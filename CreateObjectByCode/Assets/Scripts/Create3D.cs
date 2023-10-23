@@ -13,16 +13,21 @@ using UnityEditor;
 
 public class Create3D : MonoBehaviour
 {
-    public Text resultAllEntityText;
-    public Text resultUniqueEntityText;
+    public Text wallEntitiyText;
+    public Text powerEntitiyText;
+    public Text doorEntitiyText;
+    public Text stairEntitiyText;
+
     public Button readButton;
     public Button createButton;
 
-    private List<EntityInfo> _listAllEntities = new List<EntityInfo>();
-    private List<EntityInfo> _listUniqueEntities = new List<EntityInfo>(); //không cần thiết lắm (quăng)
+    private List<UnityEntity> _listAllEntities = new List<UnityEntity>();
+    private List<Door> _listDoorEntities = new List<Door>();
+    private List<Power> _listPowerEntities = new List<Power>();
+    private List<Stair> _listStairEntities = new List<Stair>();
+    private List<Wall> _listWallEntities = new List<Wall>();
+
     public GameObject _doorPrefab;
-
-
 
     Vector3 targetScale = new Vector3(1f, 1f, 1f); // Kích thước mục tiêu
     Vector3 initialDoorScale = new Vector3(50f, 50f, 50f); // Kích thước ban đầu của cửa
@@ -43,49 +48,121 @@ public class Create3D : MonoBehaviour
             string json = File.ReadAllText(jsonPath);
 
             _listAllEntities.Clear();
-            _listUniqueEntities.Clear();
-
             try
             {
-                Document document = JsonConvert.DeserializeObject<Document>(json);
+                //List<UnityEntity> unityEntity = JsonConvert.DeserializeObject<List<UnityEntity>>(json);
 
-                _listAllEntities = document.getAllEntity();
+                //// Lọc và tạo danh sách Wall Entities
+                //List<Wall> wallEntities = unityEntity
+                //    .Where(entity => entity is Wall)
+                //    .Select(entity => (Wall)entity)
+                //    .ToList();
 
-                _listUniqueEntities = _listAllEntities
-                    .GroupBy(entity => new { entity.LayerName, entity.ObjectType })
-                    .Select(group => new EntityInfo(null, group.Key.LayerName, group.Key.ObjectType, null))
-                    .ToList();
+                //_listWallEntities = wallEntities;
 
+                //// Lọc và tạo danh sách Door Entities
+                //List<Door> doorEntities = unityEntity
+                //    .Where(entity => entity is Door)
+                //    .Select(entity => (Door)entity)
+                //    .ToList();
 
-                resultAllEntityText.text = "All Entities:\n";
-                foreach (EntityInfo entity in _listAllEntities)
+                //_listDoorEntities = doorEntities;
+
+                //// Lọc và tạo danh sách Power Entities
+                //List<Power> powerEntities = unityEntity
+                //    .Where(entity => entity is Power)
+                //    .Select(entity => (Power)entity)
+                //    .ToList();
+
+                //_listPowerEntities = powerEntities;
+
+                //// Lọc và tạo danh sách Stair Entities
+                //List<Stair> stairEntities = unityEntity
+                //    .Where(entity => entity is Stair)
+                //    .Select(entity => (Stair)entity)
+                //    .ToList();
+
+                //_listStairEntities = stairEntities;
+
+                //List<UnityEntity> unityEntities = JsonConvert.DeserializeObject<List<UnityEntity>>(json);
+
+                //foreach (var entity in unityEntities)
+                //{
+                //    if (entity is Door door)
+                //    {
+                //        _listDoorEntities.Add(door);
+                //    }
+                //    else if (entity is Stair stair)
+                //    {
+                //        _listStairEntities.Add(stair);
+                //    }
+                //    else if (entity is Power power)
+                //    {
+                //        _listPowerEntities.Add(power);
+                //    }
+                //    else if (entity is Wall wall)
+                //    {
+                //        _listWallEntities.Add(wall);
+                //    }
+                //}
+                //foreach (var entity in unityEntities)
+                //{
+                //    //_listAllEntities.Add(entity);
+
+                //    //if (entity is Wall wall)
+                //    //{
+                //    //    _listWallEntities.Add(wall);
+                //    //}
+                //    //else if (entity is Door door)
+                //    //{
+                //    //    _listDoorEntities.Add(door);
+                //    //}
+                //    //else if (entity is Stair stair)
+                //    //{
+                //    //    _listStairEntities.Add(stair);
+                //    //}
+
+                //    if (entity.TypeOfUnityEntity == "Wall")
+                //    {
+                //        _listWallEntities.Add(entity);
+                //    }
+                //}
+
+                List<ExportArchitectureToJSON> unityEntity = JsonConvert.DeserializeObject<List<ExportArchitectureToJSON>>(json);
+
+                foreach (var entity in unityEntity)
                 {
-                    string coordinates = "";
-                    resultAllEntityText.text += $"{entity.LayerName} ({entity.ObjectType}) \n";
+                   
 
-                    if(entity.ObjectType == "LwPolyline")
-                    {
-                        foreach (string temp in entity.Coordinates)
-                        {
-                            coordinates += temp + "\n";
-                        }
-                        resultAllEntityText.text += coordinates;
-                    }
-                    if (entity.ObjectType == "Insert")
-                    {
-                        foreach (string temp in entity.Coordinates)
-                        {
-                            coordinates += temp + "\n";
-                        }
-                        resultAllEntityText.text += coordinates;
-                    }
                 }
 
-                // In danh sách phần tử trong _listUniqueEntities vào resultUniqueEntityText
-                resultUniqueEntityText.text = "Unique Entities:\n";
-                foreach (EntityInfo entity in _listUniqueEntities)
+                // In ra file text
+                wallEntitiyText.text = "Entity: \n";
+                foreach(var entity in _listAllEntities)
                 {
-                    resultUniqueEntityText.text += $"{entity.LayerName} ({entity.ObjectType})\n";
+                    wallEntitiyText.text += entity.LayerName.ToString();
+                    wallEntitiyText.text += "\n";
+                }
+
+                powerEntitiyText.text = "Power: \n";
+                foreach (var entity in _listPowerEntities)
+                {
+                    powerEntitiyText.text += entity.TypeOfUnityEntity.ToString();
+                    powerEntitiyText.text += "\n";
+                }
+
+                stairEntitiyText.text = "Stair: \n";
+                foreach (var entity in _listStairEntities)
+                {
+                    stairEntitiyText.text += entity.TypeOfUnityEntity.ToString();
+                    stairEntitiyText.text += "\n";
+                }
+
+                doorEntitiyText.text = "Door: \n";
+                foreach (var entity in _listDoorEntities)
+                {
+                    doorEntitiyText.text += entity.TypeOfUnityEntity.ToString();
+                    doorEntitiyText.text += "\n";
                 }
             }
             catch (Exception ex)
@@ -99,7 +176,7 @@ public class Create3D : MonoBehaviour
     {
         // lấy vi trí và kích thước của tường trước để dựng cái đối tượng insert
         int isHaveWalls = 0;
-        foreach (EntityInfo entity in _listAllEntities)
+        foreach (UnityEntity entity in _listAllEntities)
         {
             if (entity.ObjectType == "LwPolyline")
             {
@@ -149,7 +226,7 @@ public class Create3D : MonoBehaviour
 
         GameObject cubeContainer = new GameObject("CubeContainer");
 
-        foreach (EntityInfo entity in _listAllEntities)
+        foreach (UnityEntity entity in _listAllEntities)
         {
             if (entity.ObjectType == "LwPolyline")
             {
