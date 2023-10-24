@@ -12,6 +12,10 @@ public class UnityEntity : MonoBehaviour
     string color;
     double height;
 
+    public UnityEntity()
+    {
+    }
+
     public UnityEntity(int? id, string layerName, string objectType, List<string> coordinates)
     {
     }
