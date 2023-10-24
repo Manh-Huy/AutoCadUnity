@@ -21,6 +21,8 @@ public class Create3D : MonoBehaviour
     public Button readButton;
     public Button createButton;
 
+    List<ExportArchitectureToJSON> _listToExport = new List<ExportArchitectureToJSON>();
+
     private List<UnityEntity> _listAllEntities = new List<UnityEntity>();
     private List<Door> _listDoorEntities = new List<Door>();
     private List<Power> _listPowerEntities = new List<Power>();
@@ -128,12 +130,16 @@ public class Create3D : MonoBehaviour
                 //    }
                 //}
 
-                List<ExportArchitectureToJSON> unityEntity = JsonConvert.DeserializeObject<List<ExportArchitectureToJSON>>(json);
+                List<ExportArchitectureToJSON> unityEntity = JsonConvert.DeserializeObject <List<ExportArchitectureToJSON>>(json);
 
-                foreach (var entity in unityEntity)
+                foreach (ExportArchitectureToJSON exportArchitecture in unityEntity)
                 {
-                   
+                    wallEntitiyText.text += exportArchitecture.NameFloor;
 
+                    foreach (UnityEntity entities in exportArchitecture.ListToExport)
+                    {
+                        wallEntitiyText.text += entities.LayerName;
+                    }
                 }
 
                 // In ra file text
