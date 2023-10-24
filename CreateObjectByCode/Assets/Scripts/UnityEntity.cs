@@ -10,7 +10,7 @@ public class UnityEntity : MonoBehaviour
     private List<string> coordinates = null;
     string typeOfUnityEntity;
     string color;
-    double height;
+    float height;
 
     public UnityEntity()
     {
@@ -31,5 +31,5 @@ public class UnityEntity : MonoBehaviour
     public List<string> Coordinates { get => coordinates; set => coordinates = value; }
     public string TypeOfUnityEntity { get => typeOfUnityEntity; set => typeOfUnityEntity = value; }
     public string Color { get => color; set => color = value; }
-    public double Height { get => height; set => height = value; }
+    public float Height { get => height; set => height = value; }
 }

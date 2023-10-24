@@ -20,6 +20,7 @@ public class Create3D : MonoBehaviour
     private GameObject _doorPrefab;
 
     private List<ExportArchitectureToJSON> _listToExport = new List<ExportArchitectureToJSON>();
+    private List<UnityFloor> _listFloor = new List<UnityFloor>();
 
 
     private void Start()
@@ -38,16 +39,13 @@ public class Create3D : MonoBehaviour
             _listToExport.Clear();
             try
             {
-                _listToExport = JsonConvert.DeserializeObject <List<ExportArchitectureToJSON>>(json);
+                //_listToExport = JsonConvert.DeserializeObject <List<ExportArchitectureToJSON>>(json);
 
-                foreach (ExportArchitectureToJSON exportArchitecture in _listToExport)
+                UnityArchitecture unityArchitecture = JsonConvert.DeserializeObject<UnityArchitecture>(json);
+
+                foreach (UnityFloor floor in unityArchitecture.ListFloor)
                 {
-                    entitiyText.text += exportArchitecture.NameFloor + "\n";
-
-                    foreach (UnityEntity entities in exportArchitecture.ListToExport)
-                    {
-                        entitiyText.text += entities.LayerName + "\n";
-                    }
+                    _listFloor.Add(floor);
                 }
 
                 // In ra file text
@@ -64,82 +62,118 @@ public class Create3D : MonoBehaviour
             }
         }
     }
+    //float entityHeight = entity.Height;
 
-    // create wall-lwpolyline and insert entitiy-Door
+    //if (entityHeight > maxHeight)
+    //{
+    //    maxHeight = entityHeight; // Cập nhật chiều cao lớn nhất
+    //}
+
+    //CreateWall(entity, wallContainer, floorHeight + entityHeight);
     public void CreateAllEntities()
     {
-        GameObject cubeContainer = new GameObject("CubeContainer");
+        float roundHeight = 0;
 
-        foreach (ExportArchitectureToJSON floor in _listToExport)
+        foreach (UnityFloor floor in _listFloor)
         {
-            foreach (UnityEntity entities in floor.ListToExport)
+            GameObject floorContainer = new GameObject("Floor Container");
+            GameObject wallContainer = new GameObject("Wall Container");
+            GameObject doorContainer = new GameObject("Door Container");
+            float floorHeight = 0;
+
+            wallContainer.transform.parent = floorContainer.transform;
+            doorContainer.transform.parent = floorContainer.transform;
+
+            foreach (UnityEntity entity in floor.ListEntities)
             {
-                if (entities.TypeOfUnityEntity == "Wall" && entities.ObjectType == "LwPolyline")
+                floorHeight = 200f;
+                //floorHeight = entity.Height;
+
+                if (entity.TypeOfUnityEntity == "Wall" && entity.ObjectType == "LwPolyline")
                 {
-                    List<Vector3> verticesList = new List<Vector3>();
+                    float wallHeight = entity.Height;
 
-                    foreach (string coordinate in entities.Coordinates)
+                    if (wallHeight > floorHeight) 
                     {
-                        // Tách các giá trị từ dòng dữ liệu
-                        string[] values = coordinate.Split(',');
-
-                        if (values.Length == 2)
-                        {
-                            if (float.TryParse(values[0], out float x) && float.TryParse(values[1], out float z))
-                            {
-                                Vector3 vertex = new Vector3(x, 0, z);
-                                verticesList.Add(vertex);
-                            }
-                        }
-                        else
-                        {
-                            Debug.Log("Wrong syntax of coordinate");
-                        }
+                        floorHeight = wallHeight;
                     }
 
-                    for (int i = 0; i < verticesList.Count; i++)
-                    {
-                        Vector3 startPoint;
-                        Vector3 endPoint;
-
-                        if (i == (verticesList.Count - 1))
-                        {
-                            startPoint = verticesList[i];
-                            endPoint = verticesList[0];
-                        }
-                        else
-                        {
-                            startPoint = verticesList[i];
-                            endPoint = verticesList[i + 1];
-                        }
-                        CreateCube(cubeContainer, startPoint, endPoint, 200f);
-                    }
+                    CreateWall(entity, wallContainer, floorHeight, floorHeight + roundHeight);
                 }
 
-                if (entities.ObjectType == "Insert" && entities.TypeOfUnityEntity == "Door")
+                if (entity.ObjectType == "Insert" && entity.TypeOfUnityEntity == "Door")
                 {
-                    string[] values = entities.Coordinates[0].Split(',');
-                    if (values.Length == 3)
-                    {
-                        if (float.TryParse(values[0], out float x) && float.TryParse(values[1], out float z))
-                        {
-                            float customScale = 50.0f;
-                            Vector3 position = new Vector3(x, 0, z);
-                            Quaternion rotation = Quaternion.Euler(-90f, -90f, 0f);
-                            GameObject door = Instantiate(_doorPrefab, position, rotation);
-                            door.transform.localScale = _doorPrefab.transform.localScale * customScale;
-                        }
-                        else
-                        {
-                            Debug.Log("Wrong syntax of coordinate");
-                        }
-                    }
+                    CreateDoor(entity, doorContainer, roundHeight);
                 }
+            }
+            roundHeight += floorHeight;
+        }
+    }
+
+    private void CreateWall(UnityEntity entity, GameObject wallContainer, float height, float roundHeight)
+    {
+        List<Vector3> verticesList = new List<Vector3>();
+
+        foreach (string coordinate in entity.Coordinates)
+        {
+            // Tách các giá trị từ dòng dữ liệu
+            string[] values = coordinate.Split(',');
+
+            if (values.Length == 2)
+            {
+                if (float.TryParse(values[0], out float x) && float.TryParse(values[1], out float z))
+                {
+                    Vector3 vertex = new Vector3(x, 0, z);
+                    verticesList.Add(vertex);
+                }
+            }
+            else
+            {
+                Debug.Log("Wrong syntax of coordinate");
+            }
+        }
+
+        for (int i = 0; i < verticesList.Count; i++)
+        {
+            Vector3 startPoint;
+            Vector3 endPoint;
+
+            if (i == (verticesList.Count - 1))
+            {
+                startPoint = verticesList[i];
+                endPoint = verticesList[0];
+            }
+            else
+            {
+                startPoint = verticesList[i];
+                endPoint = verticesList[i + 1];
+            }
+            CreateCube(wallContainer, startPoint, endPoint, height, roundHeight);
+        }
+    }
+
+    private void CreateDoor(UnityEntity entity, GameObject doorContainer, float roundheight)
+    {
+        string[] values = entity.Coordinates[0].Split(',');
+        if (values.Length == 3)
+        {
+            if (float.TryParse(values[0], out float x) && float.TryParse(values[1], out float z))
+            {
+                float customScale = 50.0f;
+                Vector3 position = new Vector3(x, roundheight / 2, z);
+                Quaternion rotation = Quaternion.Euler(-90f, -90f, 0f);
+                GameObject door = Instantiate(_doorPrefab, position, rotation);
+                door.transform.localScale = _doorPrefab.transform.localScale * customScale;
+                door.transform.parent = doorContainer.transform;
+            }
+            else
+            {
+                Debug.Log("Wrong syntax of coordinate");
             }
         }
     }
 
-    private void CreateCube(GameObject container, Vector3 startPoint, Vector3 endPoint, float height)
+    private void CreateCube(GameObject container, Vector3 startPoint, Vector3 endPoint, float height, float roundHeight)
     {
         GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
@@ -160,7 +194,7 @@ public class Create3D : MonoBehaviour
 
         // đặt lại vị trí cube trên mặt đất (trên (0,0,0))
         Vector3 newPosition = cube.transform.position;
-        newPosition.y = height / 2;
+        newPosition.y = roundHeight / 2;
         cube.transform.position = newPosition;
 
         Renderer cubeRenderer = cube.GetComponent<Renderer>();
