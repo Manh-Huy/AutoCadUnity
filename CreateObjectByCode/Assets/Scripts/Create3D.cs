@@ -10,16 +10,12 @@ using UnityEngine.UI;
 using Newtonsoft.Json;
 using System.Linq;
 using UnityEditor;
-using static UnityEngine.EventSystems.EventTrigger;
 
 public class Create3D : MonoBehaviour
 {
     [SerializeField]
-    private Text entitiyText;
-    [SerializeField]
     private GameObject _doorPrefab;
 
-    private List<ExportArchitectureToJSON> _listToExport = new List<ExportArchitectureToJSON>();
     private List<UnityFloor> _listFloor = new List<UnityFloor>();
 
 
@@ -36,25 +32,15 @@ public class Create3D : MonoBehaviour
         {
             string json = File.ReadAllText(jsonPath);
 
-            _listToExport.Clear();
+            _listFloor.Clear();
             try
             {
-                //_listToExport = JsonConvert.DeserializeObject <List<ExportArchitectureToJSON>>(json);
-
                 UnityArchitecture unityArchitecture = JsonConvert.DeserializeObject<UnityArchitecture>(json);
 
                 foreach (UnityFloor floor in unityArchitecture.ListFloor)
                 {
                     _listFloor.Add(floor);
                 }
-
-                // In ra file text
-                //wallEntitiyText.text = "Entity: \n";
-                //foreach(var entity in _listAllEntities)
-                //{
-                //    wallEntitiyText.text += entity.LayerName.ToString();
-                //    wallEntitiyText.text += "\n";
-                //}
             }
             catch (Exception ex)
             {
@@ -62,17 +48,10 @@ public class Create3D : MonoBehaviour
             }
         }
     }
-    //float entityHeight = entity.Height;
 
-    //if (entityHeight > maxHeight)
-    //{
-    //    maxHeight = entityHeight; // Cập nhật chiều cao lớn nhất
-    //}
-
-    //CreateWall(entity, wallContainer, floorHeight + entityHeight);
     public void CreateAllEntities()
     {
-        float roundHeight = 0;
+        float groundHeight = 0;
 
         foreach (UnityFloor floor in _listFloor)
         {
@@ -86,31 +65,34 @@ public class Create3D : MonoBehaviour
 
             foreach (UnityEntity entity in floor.ListEntities)
             {
-                floorHeight = 200f;
-                //floorHeight = entity.Height;
+                //float entityHeight = entity.Height;
+
+                //if (entityHeight > floorHeight)
+                //{
+                //    // floorHeight là chiều cao lớn nhất trong tầng đó (bthg là chiều cao của tường lớn nhất)
+                //    floorHeight = entityHeight;
+                //}
+
+                floorHeight = 200f; // thay thế các dòng comment trên (set cứng)
 
                 if (entity.TypeOfUnityEntity == "Wall" && entity.ObjectType == "LwPolyline")
                 {
-                    float wallHeight = entity.Height;
+                    //float wallHeight = entityHeight;
+                    float wallHeight = 200f; // thay thế dòng trên (set cứng)
 
-                    if (wallHeight > floorHeight) 
-                    {
-                        floorHeight = wallHeight;
-                    }
-
-                    CreateWall(entity, wallContainer, floorHeight, floorHeight + roundHeight);
+                    CreateWall(entity, wallContainer, wallHeight, groundHeight);
                 }
 
                 if (entity.ObjectType == "Insert" && entity.TypeOfUnityEntity == "Door")
                 {
-                    CreateDoor(entity, doorContainer, roundHeight);
+                    CreateDoor(entity, doorContainer, groundHeight);
                 }
             }
-            roundHeight += floorHeight;
+            groundHeight += floorHeight;
         }
     }
 
-    private void CreateWall(UnityEntity entity, GameObject wallContainer, float height, float roundHeight)
+    private void CreateWall(UnityEntity entity, GameObject wallContainer, float height, float groundHeight)
     {
         List<Vector3> verticesList = new List<Vector3>();
 
@@ -148,11 +130,11 @@ public class Create3D : MonoBehaviour
                 startPoint = verticesList[i];
                 endPoint = verticesList[i + 1];
             }
-            CreateCube(wallContainer, startPoint, endPoint, height, roundHeight);
+            CreateCube(wallContainer, startPoint, endPoint, height, groundHeight);
         }
     }
 
-    private void CreateDoor(UnityEntity entity, GameObject doorContainer, float roundheight)
+    private void CreateDoor(UnityEntity entity, GameObject doorContainer, float groundheight)
     {
         string[] values = entity.Coordinates[0].Split(',');
         if (values.Length == 3)
@@ -160,7 +142,7 @@ public class Create3D : MonoBehaviour
             if (float.TryParse(values[0], out float x) && float.TryParse(values[1], out float z))
             {
                 float customScale = 50.0f;
-                Vector3 position = new Vector3(x, roundheight / 2, z);
+                Vector3 position = new Vector3(x, groundheight, z);
                 Quaternion rotation = Quaternion.Euler(-90f, -90f, 0f);
                 GameObject door = Instantiate(_doorPrefab, position, rotation);
                 door.transform.localScale = _doorPrefab.transform.localScale * customScale;
@@ -173,7 +155,7 @@ public class Create3D : MonoBehaviour
         }
     }
 
-    private void CreateCube(GameObject container, Vector3 startPoint, Vector3 endPoint, float height, float roundHeight)
+    private void CreateCube(GameObject container, Vector3 startPoint, Vector3 endPoint, float height, float groundHeight)
     {
         GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
@@ -194,7 +176,7 @@ public class Create3D : MonoBehaviour
 
         // đặt lại vị trí cube trên mặt đất (trên (0,0,0))
         Vector3 newPosition = cube.transform.position;
-        newPosition.y = roundHeight / 2;
+        newPosition.y = groundHeight + (height) / 2;
         cube.transform.position = newPosition;
 
         Renderer cubeRenderer = cube.GetComponent<Renderer>();
