@@ -10,6 +10,7 @@ using UnityEngine.UI;
 using Newtonsoft.Json;
 using System.Linq;
 using UnityEditor;
+using UnityEngine.UIElements;
 
 public class Create3D : MonoBehaviour
 {
@@ -17,6 +18,7 @@ public class Create3D : MonoBehaviour
     private GameObject _doorPrefab;
 
     private List<UnityFloor> _listFloor = new List<UnityFloor>();
+    List<Vector3> listAllVerticesOfWall = new List<Vector3>();
 
 
     private void Start()
@@ -63,6 +65,8 @@ public class Create3D : MonoBehaviour
             wallContainer.transform.parent = floorContainer.transform;
             doorContainer.transform.parent = floorContainer.transform;
 
+
+
             foreach (UnityEntity entity in floor.ListEntities)
             {
                 //float entityHeight = entity.Height;
@@ -85,7 +89,7 @@ public class Create3D : MonoBehaviour
 
                 if (entity.ObjectType == "Insert" && entity.TypeOfUnityEntity == "Door")
                 {
-                    CreateDoor(entity, doorContainer, groundHeight);
+                    CreateDoor(floor.ListEntities, entity, doorContainer, groundHeight);
                 }
             }
             groundHeight += floorHeight;
@@ -115,6 +119,8 @@ public class Create3D : MonoBehaviour
             }
         }
 
+        listAllVerticesOfWall.AddRange(verticesList);
+
         for (int i = 0; i < verticesList.Count; i++)
         {
             Vector3 startPoint;
@@ -134,25 +140,248 @@ public class Create3D : MonoBehaviour
         }
     }
 
-    private void CreateDoor(UnityEntity entity, GameObject doorContainer, float groundheight)
+    private void CreateDoor(List<UnityEntity> listEntities, UnityEntity entity, GameObject doorContainer, float groundheight)
     {
-        string[] values = entity.Coordinates[0].Split(',');
-        if (values.Length == 3)
+        List<Vector3> listPoint = new List<Vector3>();
+        Vector3 positionDoor = new Vector3();
+        Vector3 positionResult = new Vector3();
+        float distanceResult = float.MaxValue;
+        Quaternion rotation = Quaternion.Euler(-90f, -90f, 0f);
+        string[] doorValue = entity.Coordinates[0].Split(',');
+        if (doorValue.Length == 3)
         {
-            if (float.TryParse(values[0], out float x) && float.TryParse(values[1], out float z))
+            if (float.TryParse(doorValue[0], out float xDoor) && float.TryParse(doorValue[1], out float zDoor))
             {
-                float customScale = 50.0f;
-                Vector3 position = new Vector3(x, groundheight, z);
+                positionDoor.x = xDoor;
+                positionDoor.y = groundheight;
+                positionDoor.z = zDoor;
+
+                foreach (UnityEntity unityEntity in listEntities)
+                {
+                    if (unityEntity.TypeOfUnityEntity == "Wall" && unityEntity.ObjectType == "LwPolyline")
+                    {
+                        foreach (string coordinate in unityEntity.Coordinates)
+                        {
+                            string[] lineValues = coordinate.Split(',');
+                            if (lineValues.Length == 2)
+                            {
+                                if (float.TryParse(lineValues[0], out float xWall) && float.TryParse(lineValues[1], out float zWall))
+                                {
+                                    if (xDoor == xWall || zDoor == zWall)
+                                    {
+                                        Vector3 point = new Vector3(xWall, 0, zWall);
+                                        listPoint.Add(point);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                listPoint = HandleListPoint(listPoint, positionDoor);
+
+
+                /*float customScale = 50.0f;
+                Vector3 position = new Vector3(xDoor, groundheight, zDoor);
                 Quaternion rotation = Quaternion.Euler(-90f, -90f, 0f);
                 GameObject door = Instantiate(_doorPrefab, position, rotation);
                 door.transform.localScale = _doorPrefab.transform.localScale * customScale;
-                door.transform.parent = doorContainer.transform;
+                door.transform.parent = doorContainer.transform;*/
             }
             else
             {
                 Debug.Log("Wrong syntax of coordinate");
             }
         }
+        foreach (Vector3 point in listPoint)
+        {
+            float distance = CalculateDistance(positionDoor.x, positionDoor.z, point.x, point.z);
+            if (distance != 0)
+            {
+                if (distance < distanceResult && !isWall(positionDoor, point))
+                {
+                    distanceResult = distance;
+                    positionResult = point;
+                }
+            }
+        }
+
+
+
+        if (positionDoor.x == positionResult.x && positionDoor.z < positionResult.z)
+        {
+            rotation = Quaternion.Euler(-90f, -90f, -90f);
+        }
+        else if (positionDoor.x == positionResult.x && positionDoor.z > positionResult.z)
+        {
+            rotation = Quaternion.Euler(-90f, -90f, 90f);
+        }
+        else if (positionDoor.x > positionResult.x && positionDoor.z == positionResult.z)
+        {
+            rotation = Quaternion.Euler(-90f, -90f, 0f);
+        }
+        else if (positionDoor.x < positionResult.x && positionDoor.z == positionResult.z)
+        {
+            rotation = Quaternion.Euler(-90f, -90f, 0f);
+        }
+         float customScale = 50.0f;
+        GameObject door = Instantiate(_doorPrefab, positionDoor, rotation);
+        door.transform.localScale = _doorPrefab.transform.localScale * customScale;
+        door.transform.parent = doorContainer.transform;
+
+    }
+
+    private List<Vector3> HandleListPoint(List<Vector3> list, Vector3 positionDoor)
+    {
+        List<Vector3> result = new List<Vector3>(4);
+        SortVector3ListByX(list);
+        for (int i = 0; i < list.Count; i++)
+        {
+            if (list[i].x == positionDoor.x && list[i].z == positionDoor.z)
+            {
+                if (i == 0)
+                {
+                    result.Add(list[i + 1]);
+                }
+                else if (i == list.Count - 1)
+                {
+                    result.Add(list[i - 1]);
+                }
+                else
+                {
+                    result.Add(list[i + 1]);
+                    result.Add(list[i - 1]);
+                }
+            }
+        }
+
+
+        SortVector3ListByZ(list);
+        for (int i = 0; i < list.Count; i++)
+        {
+            if (list[i].x == positionDoor.x && list[i].z == positionDoor.z)
+            {
+                if (i == 0)
+                {
+                    result.Add(list[i + 1]);
+                }
+                else if (i == list.Count - 1)
+                {
+                    result.Add(list[i - 1]);
+                }
+                else
+                {
+                    result.Add(list[i + 1]);
+                    result.Add(list[i - 1]);
+                }
+            }
+        }
+
+        result = RemoveDuplicates(result);
+
+        return result;
+    }
+
+    private List<Vector3> RemoveDuplicates(List<Vector3> list)
+    {
+        List<Vector3> uniqueList = new List<Vector3>();
+
+        foreach (Vector3 item in list)
+        {
+            if (!uniqueList.Contains(item))
+            {
+                uniqueList.Add(item);
+            }
+        }
+
+        return uniqueList;
+    }
+
+    public List<Vector3> SortVector3ListByX(List<Vector3> list)
+    {
+        list.Sort(CompareVector3ByX);
+        return list;
+    }
+
+    private int CompareVector3ByX(Vector3 a, Vector3 b)
+    {
+        if (a.x < b.x)
+            return -1;
+        else if (a.x > b.x)
+            return 1;
+        else
+        {
+            if (a.z < b.z)
+                return -1;
+            else if (a.z > b.z)
+                return 1;
+            else
+                return 0;
+        }
+    }
+
+    public List<Vector3> SortVector3ListByZ(List<Vector3> list)
+    {
+        list.Sort(CompareVector3ByZ);
+        return list;
+    }
+
+    private int CompareVector3ByZ(Vector3 a, Vector3 b)
+    {
+        if (a.z < b.z)
+            return -1;
+        else if (a.z > b.z)
+            return 1;
+        else
+        {
+            if (a.x < b.x)
+                return -1;
+            else if (a.x > b.x)
+                return 1;
+            else
+                return 0;
+        }
+    }
+
+
+    private bool isWall(Vector3 positionDoor, Vector3 verticeWall)
+    {
+        for (int i = 0; i < listAllVerticesOfWall.Count; i++)
+        {
+            Vector3 startPoint;
+            Vector3 endPoint;
+
+            if (i == (listAllVerticesOfWall.Count - 1))
+            {
+                startPoint = listAllVerticesOfWall[i];
+                endPoint = listAllVerticesOfWall[0];
+            }
+            else
+            {
+                startPoint = listAllVerticesOfWall[i];
+                endPoint = listAllVerticesOfWall[i + 1];
+            }
+
+            if ((positionDoor == startPoint && verticeWall == endPoint)
+                || (positionDoor == endPoint && verticeWall == startPoint))
+            {
+                return true;
+            }
+
+        }
+        return false;
+    }
+
+
+    private float CalculateDistance(float x1, float y1, float x2, float y2)
+    {
+        float deltaX = x2 - x1;
+        float deltaY = y2 - y1;
+
+        // Sử dụng công thức khoảng cách Euclid: sqrt((x2 - x1)^2 + (y2 - y1)^2)
+        float distance = (float)Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
+
+        return distance;
     }
 
     private void CreateCube(GameObject container, Vector3 startPoint, Vector3 endPoint, float height, float groundHeight)
