@@ -17,6 +17,9 @@ public class Create3D : MonoBehaviour
     [SerializeField]
     private GameObject _doorPrefab;
 
+    [SerializeField]
+    private GameObject _stairPrefab;
+
     private List<UnityFloor> _listFloor = new List<UnityFloor>();
     List<Vector3> listAllVerticesOfWall = new List<Vector3>();
 
@@ -60,10 +63,18 @@ public class Create3D : MonoBehaviour
             GameObject floorContainer = new GameObject("Floor Container");
             GameObject wallContainer = new GameObject("Wall Container");
             GameObject doorContainer = new GameObject("Door Container");
+            GameObject stairContainer = new GameObject("Stair Container");
             float floorHeight = 0;
 
             wallContainer.transform.parent = floorContainer.transform;
             doorContainer.transform.parent = floorContainer.transform;
+            stairContainer.transform.parent = floorContainer.transform;
+
+            // stair
+            List<Vector3> verticeStairsList = new List<Vector3>();
+            Vector3 stairPosition = new Vector3();
+            float stairLength; // chiều dài của cầu thang
+            float stairWidth;  // chiều rộng của cầu thang
 
 
 
@@ -91,7 +102,23 @@ public class Create3D : MonoBehaviour
                 {
                     CreateDoor(floor.ListEntities, entity, doorContainer, groundHeight);
                 }
+
+                if (entity.ObjectType == "Line" && entity.TypeOfUnityEntity == "Stair")
+                {
+                    verticeStairsList.AddRange(AddAllVector3ofEntitiesToList(entity));
+                }
             }
+
+            if (verticeStairsList.Count > 0)
+            {
+                stairPosition = CalculateCenterCoordinates(verticeStairsList);
+                stairLength = CalculateNthMaxDistance(verticeStairsList, 1);
+                stairWidth = CalculateNthMaxDistance(verticeStairsList, 2) / 2f;
+                CreateStair(stairPosition, stairLength, stairWidth, stairContainer, floorHeight, groundHeight);
+            }
+            
+
+            // cộng với chiều cao tầng này để bắt đầu dựng tầng sau
             groundHeight += floorHeight;
         }
     }
@@ -382,6 +409,107 @@ public class Create3D : MonoBehaviour
         float distance = (float)Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
 
         return distance;
+    }
+
+    /*
+    nếu floorHeight = 200:
+    scale y wall: 1 --> 200
+    scale y stair: 35--> ? (35 * 200)
+
+    position y wall: scale = 1 --> position y = 0.5
+    =>position y wall = scale y wall / 2
+    position y stair: scale = 35 --> position y = 0.4375
+    =>positiion y stair = scale y stair * 0.4375 / 35
+
+    floorHeight = 200 
+    => position y stair = 35 * 200 * 0.4375 / 35 = 200 * 0.4375;
+    => scale y stair = 35 * 200 
+
+    ==> position y stair = floorHeight * 0.4375;
+    ==> scale y stair = floorHeight * 35
+     */
+    private void CreateStair(Vector3 position, float stairLength, float stairWidth, GameObject containerStair, float floorHeight, float groundHeight)
+    {
+        position.y = groundHeight + floorHeight * 0.4375f;
+        Quaternion rotation = Quaternion.Euler(0, 90f, 0f);
+        GameObject stair = Instantiate(_stairPrefab, position, rotation);
+
+        //Vector3 defaultScale = _stairPrefab.transform.localScale;
+        //stair.transform.localScale = defaultScale * floorHeight / defaultScale.y;
+        stair.transform.localScale = new Vector3(stairWidth * 35, floorHeight * 35, stairLength * 35);
+        stair.transform.parent = containerStair.transform;
+    }
+
+    private List<Vector3> AddAllVector3ofEntitiesToList(UnityEntity entity)
+    {
+        List<Vector3> verticesList = new List<Vector3>();
+
+        foreach (string coordinate in entity.Coordinates)
+        {
+            // Tách các giá trị từ dòng dữ liệu
+            string[] values = coordinate.Split(',');
+
+            if (values.Length == 3)
+            {
+                if (float.TryParse(values[0], out float x) && float.TryParse(values[1], out float z))
+                {
+                    Vector3 vertex = new Vector3(x, 0, z);
+                    verticesList.Add(vertex);
+                }
+            }
+            else
+            {
+                Debug.Log("Wrong syntax of coordinate");
+            }
+        }
+
+       return verticesList;
+    }
+
+    // Tính độ dài lớn nhất (n= 0), nhì (n = 1), ba (n = 2), ... giữa các điểm trong list
+    public float CalculateNthMaxDistance(List<Vector3> pointList, int n)
+    {
+        if (n <= 0)
+        {
+            throw new ArgumentException("Parameter 'n' must be greater than 0.");
+        }
+
+        List<float> distances = new List<float>();
+
+        for (int i = 0; i < pointList.Count; i++)
+        {
+            for (int j = i + 1; j < pointList.Count; j++)
+            {
+                Vector3 pointA = pointList[i];
+                Vector3 pointB = pointList[j];
+
+                float distance = Vector2.Distance(new Vector2(pointA.x, pointA.y), new Vector2(pointB.x, pointB.y));
+                distances.Add(distance);
+            }
+        }
+
+        // Sort the distances in descending order.
+        distances.Sort((a, b) => -a.CompareTo(b));
+
+        if (n <= distances.Count)
+        {
+            return distances[n - 1];
+        }
+        else
+        {
+            throw new ArgumentException("Parameter 'n' exceeds the number of distances in the list.");
+        }
+    }
+
+    private Vector3 CalculateCenterCoordinates(List<Vector3> verticesList)
+    {
+        Vector3 center = Vector3.zero;
+        foreach (Vector3 coord in verticesList)
+        {
+            center += coord;
+        }
+        center /= verticesList.Count;
+        return center; // vector output sẽ co x và y là trọng tâm còn z có mặc định là 0
     }
 
     private void CreateCube(GameObject container, Vector3 startPoint, Vector3 endPoint, float height, float groundHeight)

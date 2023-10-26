@@ -834,6 +834,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _doorPrefab: {fileID: 7045018640448034017, guid: fe8ea53b3543f394a96599634e13c2f4, type: 3}
+  _stairPrefab: {fileID: 7745906642624567150, guid: f643d98c8ac5d1b49b11c7d13ce2e370, type: 3}
 --- !u!114 &2033603328
 MonoBehaviour:
   m_ObjectHideFlags: 0
