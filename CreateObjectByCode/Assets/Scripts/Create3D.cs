@@ -20,6 +20,9 @@ public class Create3D : MonoBehaviour
     [SerializeField]
     private GameObject _stairPrefab;
 
+    [SerializeField]
+    private GameObject _windowPrefab;
+
     private List<UnityFloor> _listFloor = new List<UnityFloor>();
     List<Vector3> listAllVerticesOfWall = new List<Vector3>();
 
@@ -64,11 +67,13 @@ public class Create3D : MonoBehaviour
             GameObject wallContainer = new GameObject("Wall Container");
             GameObject doorContainer = new GameObject("Door Container");
             GameObject stairContainer = new GameObject("Stair Container");
+            GameObject windowContainer = new GameObject("Window Container");
             float floorHeight = 0;
 
             wallContainer.transform.parent = floorContainer.transform;
             doorContainer.transform.parent = floorContainer.transform;
             stairContainer.transform.parent = floorContainer.transform;
+            windowContainer.transform.parent = floorContainer.transform;
 
             // stair
             List<Vector3> verticeStairsList = new List<Vector3>();
@@ -88,12 +93,12 @@ public class Create3D : MonoBehaviour
                 //    floorHeight = entityHeight;
                 //}
 
-                floorHeight = 200f; // thay thế các dòng comment trên (set cứng)
+                floorHeight = 100f; // thay thế các dòng comment trên (set cứng)
 
                 if (entity.TypeOfUnityEntity == "Wall" && entity.ObjectType == "LwPolyline")
                 {
                     //float wallHeight = entityHeight;
-                    float wallHeight = 200f; // thay thế dòng trên (set cứng)
+                    float wallHeight = 100f; // thay thế dòng trên (set cứng)
 
                     CreateWall(entity, wallContainer, wallHeight, groundHeight);
                 }
@@ -107,6 +112,11 @@ public class Create3D : MonoBehaviour
                 {
                     verticeStairsList.AddRange(AddAllVector3ofEntitiesToList(entity));
                 }
+
+                if (entity.TypeOfUnityEntity == "Window" && entity.ObjectType == "Insert")
+                {
+                    CreateWindow(floor.ListEntities, entity, windowContainer, floorHeight / 2);
+                }
             }
 
             if (verticeStairsList.Count > 0)
@@ -116,7 +126,7 @@ public class Create3D : MonoBehaviour
                 stairWidth = CalculateNthMaxDistance(verticeStairsList, 2) / 2f;
                 CreateStair(stairPosition, stairLength, stairWidth, stairContainer, floorHeight, groundHeight);
             }
-            
+
 
             // cộng với chiều cao tầng này để bắt đầu dựng tầng sau
             groundHeight += floorHeight;
@@ -166,6 +176,8 @@ public class Create3D : MonoBehaviour
             CreateCube(wallContainer, startPoint, endPoint, height, groundHeight);
         }
     }
+
+    #region Functions Create Door
 
     private void CreateDoor(List<UnityEntity> listEntities, UnityEntity entity, GameObject doorContainer, float groundheight)
     {
@@ -251,7 +263,7 @@ public class Create3D : MonoBehaviour
         {
             rotation = Quaternion.Euler(-90f, -90f, 0f);
         }
-         float customScale = 50.0f;
+        float customScale = 50.0f;
         GameObject door = Instantiate(_doorPrefab, positionDoor, rotation);
         door.transform.localScale = _doorPrefab.transform.localScale * customScale;
         door.transform.parent = doorContainer.transform;
@@ -370,7 +382,6 @@ public class Create3D : MonoBehaviour
         }
     }
 
-
     private bool isWall(Vector3 positionDoor, Vector3 verticeWall)
     {
         for (int i = 0; i < listAllVerticesOfWall.Count; i++)
@@ -399,6 +410,9 @@ public class Create3D : MonoBehaviour
         return false;
     }
 
+    #endregion
+
+    #region Functions Create Stair
 
     private float CalculateDistance(float x1, float y1, float x2, float y2)
     {
@@ -463,7 +477,7 @@ public class Create3D : MonoBehaviour
             }
         }
 
-       return verticesList;
+        return verticesList;
     }
 
     // Tính độ dài lớn nhất (n= 0), nhì (n = 1), ba (n = 2), ... giữa các điểm trong list
@@ -539,4 +553,121 @@ public class Create3D : MonoBehaviour
         Renderer cubeRenderer = cube.GetComponent<Renderer>();
         cubeRenderer.material.color = Color.gray;
     }
+
+    #endregion
+
+    #region Functions Create Window
+    private void CreateWindow(List<UnityEntity> listEntities, UnityEntity entity, GameObject windowContainer, float groundHeight)
+    {
+        List<Vector3> listPointOfWall = new List<Vector3>();
+        Vector3 positionWindow = new Vector3();
+        Quaternion rotation = Quaternion.Euler(-90f, -90f, 0f);
+
+
+        string[] windowValue = entity.Coordinates[0].Split(',');
+        if (windowValue.Length == 3)
+        {
+            if (float.TryParse(windowValue[0], out float xWindow) && float.TryParse(windowValue[1], out float zWindow))
+            {
+                positionWindow.x = xWindow;
+                positionWindow.y = groundHeight;
+                positionWindow.z = zWindow;
+
+                foreach (UnityEntity unityEntity in listEntities)
+                {
+                    if (unityEntity.TypeOfUnityEntity == "Wall" && unityEntity.ObjectType == "LwPolyline")
+                    {
+                        foreach (string coordinate in unityEntity.Coordinates)
+                        {
+                            string[] lineValues = coordinate.Split(',');
+                            if (lineValues.Length == 2)
+                            {
+                                if (float.TryParse(lineValues[0], out float xWall) && float.TryParse(lineValues[1], out float zWall))
+                                {
+                                    if (xWindow == xWall || zWindow == zWall)
+                                    {
+                                        Vector3 point = new Vector3(xWall, 0, zWall);
+                                        listPointOfWall.Add(point);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        listPointOfWall = HandleListPointOfWall(listPointOfWall, positionWindow);
+
+        if (listPointOfWall.Count == 2)
+        {
+            if(listPointOfWall[0].x == positionWindow.x && listPointOfWall[1].x == positionWindow.x)
+            {
+                rotation = Quaternion.Euler(-90f, 0f, 180f);
+            }
+        }
+        else if (listPointOfWall.Count == 4)
+        {
+        }
+
+
+        GameObject window = Instantiate(_windowPrefab, positionWindow, rotation);
+        float customScale = 50.0f;
+        window.transform.localScale = _windowPrefab.transform.localScale * customScale;
+        window.transform.localScale += new Vector3(60f, -3f, 10f);
+        window.transform.parent = windowContainer.transform;
+    }
+
+    private List<Vector3> HandleListPointOfWall(List<Vector3> list, Vector3 positionWindow)
+    {
+        List<Vector3> result = new List<Vector3>(4);
+        int countX = 0; int countZ = 0;
+
+
+        foreach (Vector3 point in list)
+        {
+            if (point.x == positionWindow.x) countX++;
+            if (point.z == positionWindow.z) countZ++;
+        }
+
+
+        if (countX >= 2)
+        {
+            SortVector3ListByX(list);
+            for (int i = 0; i < list.Count - 1; i++)
+            {
+                if (list[i].x == positionWindow.x && list[i + 1].x == positionWindow.x &&
+                    list[i].z < positionWindow.z && list[i + 1].z > positionWindow.z)
+                {
+                    result.Add(list[i]);
+                    result.Add(list[i + 1]);
+                }
+            }
+        }
+
+
+        if (countZ >= 2)
+        {
+            SortVector3ListByZ(list);
+            for (int i = 0; i < list.Count - 1; i++)
+            {
+                if (list[i].x < positionWindow.x && list[i + 1].x > positionWindow.x &&
+                    list[i].z == positionWindow.z && list[i + 1].z == positionWindow.z)
+                {
+                    result.Add(list[i]);
+                    result.Add(list[i + 1]);
+                }
+            }
+        }
+
+        result = RemoveDuplicates(result);
+
+        return result;
+    }
+    #endregion
+
+
+
+
+
 }
