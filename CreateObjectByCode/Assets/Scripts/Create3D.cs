@@ -115,7 +115,7 @@ public class Create3D : MonoBehaviour
 
                 if (entity.TypeOfUnityEntity == "Window" && entity.ObjectType == "Insert")
                 {
-                    CreateWindow(floor.ListEntities, entity, windowContainer, floorHeight / 2);
+                    CreateWindow(floor.ListEntities, entity, windowContainer, groundHeight + (floorHeight / 2));
                 }
             }
 
