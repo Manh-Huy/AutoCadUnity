@@ -136,7 +136,7 @@ public class Create3D : MonoBehaviour
             {
                 if (float.TryParse(values[0], out float x) && float.TryParse(values[1], out float z))
                 {
-                    Vector3 vertex = new Vector3(x, 0, z);
+                    Vector3 vertex = new Vector3(x, groundHeight, z);
                     verticesList.Add(vertex);
                 }
             }
@@ -196,7 +196,7 @@ public class Create3D : MonoBehaviour
                                 {
                                     if (xDoor == xWall || zDoor == zWall)
                                     {
-                                        Vector3 point = new Vector3(xWall, 0, zWall);
+                                        Vector3 point = new Vector3(xWall, groundheight, zWall);
                                         listPoint.Add(point);
                                     }
                                 }
@@ -245,7 +245,7 @@ public class Create3D : MonoBehaviour
         }
         else if (positionDoor.x > positionResult.x && positionDoor.z == positionResult.z)
         {
-            rotation = Quaternion.Euler(-90f, -90f, 0f);
+            rotation = Quaternion.Euler(-90f, -90f, 180f);
         }
         else if (positionDoor.x < positionResult.x && positionDoor.z == positionResult.z)
         {
