@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/Create3DObjectFromPolylineVertex.unity
+    guid: 577483d4816839441abad6114a53553d
   m_configObjects: {}

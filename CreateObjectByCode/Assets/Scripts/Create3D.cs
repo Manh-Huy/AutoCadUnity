@@ -34,7 +34,9 @@ public class Create3D : MonoBehaviour
     }
     public void ReadJSON()
     {
-        string jsonPath = EditorUtility.OpenFilePanel("Select JSON File", "", "json");
+        //string jsonPath = EditorUtility.OpenFilePanel("Select JSON File", "", "json");
+        string jsonPath = @"C:\Users\house.json";
+
 
         if (!string.IsNullOrEmpty(jsonPath))
         {
@@ -56,6 +58,7 @@ public class Create3D : MonoBehaviour
             }
         }
     }
+
 
     public void CreateAllEntities()
     {
