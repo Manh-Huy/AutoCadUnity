@@ -880,6 +880,7 @@ MonoBehaviour:
   _doorPrefab: {fileID: 7045018640448034017, guid: fe8ea53b3543f394a96599634e13c2f4, type: 3}
   _stairPrefab: {fileID: 7745906642624567150, guid: f643d98c8ac5d1b49b11c7d13ce2e370, type: 3}
   _windowPrefab: {fileID: 6054821994951442945, guid: bd44877d8c14ea4459945ac6d90b0e3c, type: 3}
+  _powerPrefab: {fileID: 8498418051937864479, guid: 142b298b7edf8cb46bf794849a7d2224, type: 3}
 --- !u!114 &2033603328
 MonoBehaviour:
   m_ObjectHideFlags: 0

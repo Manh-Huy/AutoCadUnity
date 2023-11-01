@@ -23,8 +23,12 @@ public class Create3D : MonoBehaviour
     [SerializeField]
     private GameObject _windowPrefab;
 
+    [SerializeField]
+    private GameObject _powerPrefab;
+
     private List<UnityFloor> _listFloor = new List<UnityFloor>();
     List<Vector3> listAllVerticesOfWall = new List<Vector3>();
+    List<GameObject> _listWall = new List<GameObject>();
 
 
     private void Start()
@@ -34,8 +38,8 @@ public class Create3D : MonoBehaviour
     }
     public void ReadJSON()
     {
-        //string jsonPath = EditorUtility.OpenFilePanel("Select JSON File", "", "json");
-        string jsonPath = @"C:\Users\house.json";
+        string jsonPath = EditorUtility.OpenFilePanel("Select JSON File", "", "json");
+        //string jsonPath = @"C:\Users\house.json";
 
 
         if (!string.IsNullOrEmpty(jsonPath))
@@ -71,12 +75,14 @@ public class Create3D : MonoBehaviour
             GameObject doorContainer = new GameObject("Door Container");
             GameObject stairContainer = new GameObject("Stair Container");
             GameObject windowContainer = new GameObject("Window Container");
+            GameObject powerContainer = new GameObject("Power Container");
             float floorHeight = 0;
 
             wallContainer.transform.parent = floorContainer.transform;
             doorContainer.transform.parent = floorContainer.transform;
             stairContainer.transform.parent = floorContainer.transform;
             windowContainer.transform.parent = floorContainer.transform;
+            powerContainer.transform.parent = floorContainer.transform;
 
             // stair
             List<Vector3> verticeStairsList = new List<Vector3>();
@@ -119,6 +125,11 @@ public class Create3D : MonoBehaviour
                 if (entity.TypeOfUnityEntity == "Window" && entity.ObjectType == "Insert")
                 {
                     CreateWindow(floor.ListEntities, entity, windowContainer, groundHeight + (floorHeight / 2));
+                }
+
+                if (entity.TypeOfUnityEntity == "Power" && entity.ObjectType == "Insert")
+                {
+                    CreatePower(floor.ListEntities, entity, wallContainer, powerContainer, groundHeight + 90);
                 }
             }
 
@@ -539,6 +550,11 @@ public class Create3D : MonoBehaviour
         float distance = Vector3.Distance(startPoint, endPoint);
         cube.transform.localScale = new Vector3(2f, height, distance);
 
+        /*BoxCollider boxCollider = cube.AddComponent<BoxCollider>();
+        boxCollider.size = cube.transform.localScale;*/
+
+ 
+
         // Xoay cube để nó hướng từ điểm đầu đến điểm cuối
         cube.transform.LookAt(endPoint);
 
@@ -555,6 +571,18 @@ public class Create3D : MonoBehaviour
 
         Renderer cubeRenderer = cube.GetComponent<Renderer>();
         cubeRenderer.material.color = Color.gray;
+
+        MeshCollider meshCollider = cube.AddComponent<MeshCollider>(); // Thêm component MeshCollider
+
+        MeshFilter meshFilter = cube.GetComponent<MeshFilter>();
+        if (meshFilter != null)
+        {
+            meshCollider.sharedMesh = meshFilter.mesh;
+            meshCollider.convex = true;
+            meshCollider.isTrigger = false;
+        }
+
+        _listWall.Add(cube);
     }
 
     #endregion
@@ -604,7 +632,7 @@ public class Create3D : MonoBehaviour
 
         if (listPointOfWall.Count == 2)
         {
-            if(listPointOfWall[0].x == positionWindow.x && listPointOfWall[1].x == positionWindow.x)
+            if (listPointOfWall[0].x == positionWindow.x && listPointOfWall[1].x == positionWindow.x)
             {
                 rotation = Quaternion.Euler(-90f, 0f, 180f);
             }
@@ -669,8 +697,77 @@ public class Create3D : MonoBehaviour
     }
     #endregion
 
+    #region Functions Create Power 
+    private void CreatePower(List<UnityEntity> listEntities, UnityEntity entity, GameObject wallContainer, GameObject powerContainer, float groundHeight)
+    {
+        List<Vector3> listPointOfWall = new List<Vector3>();
+        Vector3 positionPower = new Vector3();
+        Quaternion rotation = Quaternion.Euler(-90f, -90f, 0f);
 
 
+        string[] powerValue = entity.Coordinates[0].Split(',');
+        if (powerValue.Length == 3)
+        {
+            if (float.TryParse(powerValue[0], out float xPower) && float.TryParse(powerValue[1], out float zPower))
+            {
+                positionPower.x = xPower;
+                positionPower.y = groundHeight;
+                positionPower.z = zPower;
 
+                /*foreach (UnityEntity unityEntity in listEntities)
+                {
+                    if (unityEntity.TypeOfUnityEntity == "Wall" && unityEntity.ObjectType == "LwPolyline")
+                    {
+                        foreach (string coordinate in unityEntity.Coordinates)
+                        {
+                            string[] lineValues = coordinate.Split(',');
+                            if (lineValues.Length == 2)
+                            {
+                                if (float.TryParse(lineValues[0], out float xWall) && float.TryParse(lineValues[1], out float zWall))
+                                {
+                                }
+                            }
+                        }
+                    }
+                }*/
+            }
+        }
 
+        GameObject power = Instantiate(_powerPrefab, positionPower, rotation);
+        float customScale = 70.0f;
+        power.transform.localScale = _windowPrefab.transform.localScale * customScale;
+        //power.transform.localScale += new Vector3(60f, -3f, 10f);
+        power.transform.parent = powerContainer.transform;
+
+        BoxCollider boxCollider = power.AddComponent<BoxCollider>();
+        boxCollider.size = new Vector3(2.2f, 0.25f, 0.4f);
+        boxCollider.center = new Vector3(0, 0.3f, -0.1f);
+
+        //HandleCollision(_listWall, power);
+    }
+
+    private void HandleCollision(List<GameObject> listWall, GameObject power)
+    {
+        // Kiểm tra va chạm hoặc nằm đè vào cube
+        BoxCollider powerCollider = power.GetComponent<BoxCollider>();
+        if(powerCollider != null)
+        {
+            foreach (GameObject wall in listWall)
+            {
+                MeshCollider wallCollider = wall.GetComponent<MeshCollider>();
+                if(wallCollider != null)
+                {
+                    if (powerCollider.bounds.Intersects(wallCollider.bounds))
+                    {
+                        Debug.Log("AAAAAA");
+                        Vector3 newPosition = power.transform.position;
+                        newPosition.z += 180f;
+                        power.transform.position = newPosition;
+                    }
+                }
+            }
+        }
+
+    }
+    #endregion
 }
