@@ -11,6 +11,8 @@ using Newtonsoft.Json;
 using System.Linq;
 using UnityEditor;
 using UnityEngine.UIElements;
+using Newtonsoft.Json.Linq;
+using System.Net;
 
 public class Create3D : MonoBehaviour
 {
@@ -22,6 +24,12 @@ public class Create3D : MonoBehaviour
 
     [SerializeField]
     private GameObject _windowPrefab;
+
+    [SerializeField]
+    private GameObject _roofTopPrefab;
+
+    [SerializeField]
+    private bool _hasRoofTop = false;
 
     private List<UnityFloor> _listFloor = new List<UnityFloor>();
     List<Vector3> listAllVerticesOfWall = new List<Vector3>();
@@ -49,6 +57,11 @@ public class Create3D : MonoBehaviour
                 {
                     _listFloor.Add(floor);
                 }
+
+                //if (unityArchitecture.TypeOfRoof == "Rooftop")
+                //{
+                //    _hasRoofTop = true;
+                //}
             }
             catch (Exception ex)
             {
@@ -59,7 +72,9 @@ public class Create3D : MonoBehaviour
 
     public void CreateAllEntities()
     {
+        int floorIndex = 0;
         float groundHeight = 0;
+        List<Vector3> coordinatesLastFloorOfWallList = new List<Vector3>();
 
         foreach (UnityFloor floor in _listFloor)
         {
@@ -81,8 +96,6 @@ public class Create3D : MonoBehaviour
             float stairLength; // chiều dài của cầu thang
             float stairWidth;  // chiều rộng của cầu thang
 
-
-
             foreach (UnityEntity entity in floor.ListEntities)
             {
                 //float entityHeight = entity.Height;
@@ -101,6 +114,12 @@ public class Create3D : MonoBehaviour
                     float wallHeight = 100f; // thay thế dòng trên (set cứng)
 
                     CreateWall(entity, wallContainer, wallHeight, groundHeight);
+
+                    // check đã đến tầng cuối chưa. Nếu rồi thì lấy tọa độ của tường để dựng roof
+                    if (floorIndex == _listFloor.Count - 1) // && cần thêm dk nhà này có rooftop không?
+                    {
+                        coordinatesLastFloorOfWallList.AddRange(AddAllVector3ofEntitiesToList(entity, 0));
+                    }
                 }
 
                 if (entity.ObjectType == "Insert" && entity.TypeOfUnityEntity == "Door")
@@ -110,7 +129,7 @@ public class Create3D : MonoBehaviour
 
                 if (entity.ObjectType == "Line" && entity.TypeOfUnityEntity == "Stair")
                 {
-                    verticeStairsList.AddRange(AddAllVector3ofEntitiesToList(entity));
+                    verticeStairsList.AddRange(AddAllVector3ofEntitiesToList(entity, 0));
                 }
 
                 if (entity.TypeOfUnityEntity == "Window" && entity.ObjectType == "Insert")
@@ -119,43 +138,35 @@ public class Create3D : MonoBehaviour
                 }
             }
 
+            // create Stair
             if (verticeStairsList.Count > 0)
             {
-                stairPosition = CalculateCenterCoordinates(verticeStairsList);
-                stairLength = CalculateNthMaxDistance(verticeStairsList, 1);
-                stairWidth = CalculateNthMaxDistance(verticeStairsList, 2) / 2f;
+                stairPosition = (Vector3)CalculateDimensionAndCenterPoint(verticeStairsList, "centerCoordinates");
+                stairLength = (float)CalculateDimensionAndCenterPoint(verticeStairsList, "length");
+                stairWidth = (float)CalculateDimensionAndCenterPoint(verticeStairsList, "width") / 2f;
                 CreateStair(stairPosition, stairLength, stairWidth, stairContainer, floorHeight, groundHeight);
             }
 
-
+            floorIndex++;
             // cộng với chiều cao tầng này để bắt đầu dựng tầng sau
             groundHeight += floorHeight;
         }
+
+        // create Roof
+        if (coordinatesLastFloorOfWallList.Count > 0)
+        {
+            Vector3 roofPosition = (Vector3)CalculateDimensionAndCenterPoint(coordinatesLastFloorOfWallList, "centerCoordinates");
+            float roofLength = (float)CalculateDimensionAndCenterPoint(coordinatesLastFloorOfWallList, "length"); // chiều dài của roof
+            float roofWidth = (float)CalculateDimensionAndCenterPoint(coordinatesLastFloorOfWallList, "width"); // chiều rộng của roof
+            // đang set mặc định chiều cao của rooftop =  75% (trung bình cộng chiều cao các tầng ngôi nhà)
+            CreateRoof(roofPosition, roofLength, roofWidth, (groundHeight / _listFloor.Count) * 0.75f, groundHeight);
+        }
     }
 
+    #region Function Create Wall
     private void CreateWall(UnityEntity entity, GameObject wallContainer, float height, float groundHeight)
     {
-        List<Vector3> verticesList = new List<Vector3>();
-
-        foreach (string coordinate in entity.Coordinates)
-        {
-            // Tách các giá trị từ dòng dữ liệu
-            string[] values = coordinate.Split(',');
-
-            if (values.Length == 2)
-            {
-                if (float.TryParse(values[0], out float x) && float.TryParse(values[1], out float z))
-                {
-                    Vector3 vertex = new Vector3(x, groundHeight, z);
-                    verticesList.Add(vertex);
-                }
-            }
-            else
-            {
-                Debug.Log("Wrong syntax of coordinate");
-            }
-        }
-
+        List<Vector3> verticesList = AddAllVector3ofEntitiesToList(entity, groundHeight);
         listAllVerticesOfWall.AddRange(verticesList);
 
         for (int i = 0; i < verticesList.Count; i++)
@@ -176,6 +187,8 @@ public class Create3D : MonoBehaviour
             CreateCube(wallContainer, startPoint, endPoint, height, groundHeight);
         }
     }
+
+    #endregion
 
     #region Functions Create Door
 
@@ -409,11 +422,6 @@ public class Create3D : MonoBehaviour
         }
         return false;
     }
-
-    #endregion
-
-    #region Functions Create Stair
-
     private float CalculateDistance(float x1, float y1, float x2, float y2)
     {
         float deltaX = x2 - x1;
@@ -425,6 +433,9 @@ public class Create3D : MonoBehaviour
         return distance;
     }
 
+    #endregion
+
+    #region Function Create Stair
     /*
     nếu floorHeight = 200:
     scale y wall: 1 --> 200
@@ -454,105 +465,7 @@ public class Create3D : MonoBehaviour
         stair.transform.parent = containerStair.transform;
     }
 
-    private List<Vector3> AddAllVector3ofEntitiesToList(UnityEntity entity)
-    {
-        List<Vector3> verticesList = new List<Vector3>();
-
-        foreach (string coordinate in entity.Coordinates)
-        {
-            // Tách các giá trị từ dòng dữ liệu
-            string[] values = coordinate.Split(',');
-
-            if (values.Length == 3)
-            {
-                if (float.TryParse(values[0], out float x) && float.TryParse(values[1], out float z))
-                {
-                    Vector3 vertex = new Vector3(x, 0, z);
-                    verticesList.Add(vertex);
-                }
-            }
-            else
-            {
-                Debug.Log("Wrong syntax of coordinate");
-            }
-        }
-
-        return verticesList;
-    }
-
-    // Tính độ dài lớn nhất (n= 0), nhì (n = 1), ba (n = 2), ... giữa các điểm trong list
-    public float CalculateNthMaxDistance(List<Vector3> pointList, int n)
-    {
-        if (n <= 0)
-        {
-            throw new ArgumentException("Parameter 'n' must be greater than 0.");
-        }
-
-        List<float> distances = new List<float>();
-
-        for (int i = 0; i < pointList.Count; i++)
-        {
-            for (int j = i + 1; j < pointList.Count; j++)
-            {
-                Vector3 pointA = pointList[i];
-                Vector3 pointB = pointList[j];
-
-                float distance = Vector2.Distance(new Vector2(pointA.x, pointA.y), new Vector2(pointB.x, pointB.y));
-                distances.Add(distance);
-            }
-        }
-
-        // Sort the distances in descending order.
-        distances.Sort((a, b) => -a.CompareTo(b));
-
-        if (n <= distances.Count)
-        {
-            return distances[n - 1];
-        }
-        else
-        {
-            throw new ArgumentException("Parameter 'n' exceeds the number of distances in the list.");
-        }
-    }
-
-    private Vector3 CalculateCenterCoordinates(List<Vector3> verticesList)
-    {
-        Vector3 center = Vector3.zero;
-        foreach (Vector3 coord in verticesList)
-        {
-            center += coord;
-        }
-        center /= verticesList.Count;
-        return center; // vector output sẽ co x và y là trọng tâm còn z có mặc định là 0
-    }
-
-    private void CreateCube(GameObject container, Vector3 startPoint, Vector3 endPoint, float height, float groundHeight)
-    {
-        GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-
-        // Tính toán vị trí và kích thước của cube
-        Vector3 centerPosition = (startPoint + endPoint) / 2f;
-        cube.transform.position = centerPosition;
-        float distance = Vector3.Distance(startPoint, endPoint);
-        cube.transform.localScale = new Vector3(2f, height, distance);
-
-        // Xoay cube để nó hướng từ điểm đầu đến điểm cuối
-        cube.transform.LookAt(endPoint);
-
-        // Chuyển cube vào empty GameObject (container)
-        cube.transform.parent = container.transform;
-
-        // Chuyển cube sang Layer 3D (0 là mặc định)
-        cube.layer = 0;
-
-        // đặt lại vị trí cube trên mặt đất (trên (0,0,0))
-        Vector3 newPosition = cube.transform.position;
-        newPosition.y = groundHeight + (height) / 2;
-        cube.transform.position = newPosition;
-
-        Renderer cubeRenderer = cube.GetComponent<Renderer>();
-        cubeRenderer.material.color = Color.gray;
-    }
+    
 
     #endregion
 
@@ -664,6 +577,158 @@ public class Create3D : MonoBehaviour
 
         return result;
     }
+    #endregion
+
+    #region Function Create Roof
+
+    /*
+     * scale roof tỉ lệ với cube (1,1,1) là (0.25, 0.25, 0.925)
+     * cube (x,y,z) -> roof (x,z,y) -> salce roof = (x là chiều ngang, y là chiều chiều dài, z là chiều cao)
+     */
+    private void CreateRoof(Vector3 position, float roofLength, float roofWidth, float roofHeight, float groundHeight)
+    {
+        // create roof
+        GameObject roof = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        roof.name = "Roof";
+        float thicknessOfbottomRoof = 1f;
+
+        roof.transform.localRotation = Quaternion.Euler(-90, 0, 0);
+        roof.transform.localScale = new Vector3(roofWidth, roofLength, thicknessOfbottomRoof);
+        roof.transform.position = new Vector3(position.x, (groundHeight + thicknessOfbottomRoof / 2f), position.z);
+
+        Renderer cubeRenderer = roof.GetComponent<Renderer>();
+        cubeRenderer.material.color = Color.gray;
+
+        // create rooftop
+        if (_hasRoofTop == true)
+        {
+            // tỉ lệ về độ lớn theo chiều x và y của rooftop và gameobject(1,1,1) là 0.25 / 1 = 0.25
+            // tỉ lệ về độ lớn theo chiều z của rooftop và gameobject(1,1,1) là 0.925 / 1 = 0.925
+            float scaleXYRatio = 0.25f;
+            float scaleZRatio = 0.925f;
+            position.y = groundHeight;
+            Quaternion rotation = Quaternion.Euler(-90, 0f, 0f);
+            GameObject roofTop = Instantiate(_roofTopPrefab, position, rotation);
+
+            roofTop.transform.localScale = new Vector3(roofWidth * scaleXYRatio, roofLength * scaleXYRatio, roofHeight * scaleZRatio);
+            roofTop.transform.parent = roof.transform;
+        }
+    }
+
+    #endregion
+
+    #region Other Functions
+
+    private object CalculateDimensionAndCenterPoint(List<Vector3> pointList, string dimension)
+    {
+        if (pointList.Count < 2)
+        {
+            throw new ArgumentException("Point list must contain at least two points!");
+        }
+
+        float maxX = float.MinValue;
+        float maxZ = float.MinValue;
+        float minX = float.MaxValue;
+        float minZ = float.MaxValue;
+
+        foreach (Vector3 point in pointList)
+        {
+            // Tìm số lớn nhất và bé nhất trên trục x
+            maxX = Mathf.Max(maxX, point.x);
+            minX = Mathf.Min(minX, point.x);
+
+            // Tìm số lớn nhất và bé nhất trên trục z
+            maxZ = Mathf.Max(maxZ, point.z);
+            minZ = Mathf.Min(minZ, point.z);
+        }
+
+        Vector2 maxPoint = new Vector2(maxX, maxZ); // điểm trên cùng bên phải của wall
+        Vector2 minPoint = new Vector2(minX, minZ); // điểm dưới cùng bên trái của wall
+
+        // tính kích thước hình chiếu trên Ox của đoạn thẳng được tạo ra từ maxVector và minVector
+        float projectionSizeX = maxPoint.x - minPoint.x;
+        // tính kích thước hình chiếu trên Oz của đoạn thẳng được tạo ra từ maxVector và minVector
+        float projectionSizeZ = maxPoint.y - minPoint.y;
+
+        // tính trọng tâm của hình (tạo độ trung điểm của đường chéo lớn nhất)
+        // (đường chéo lớn nhất được tạo thành từ điểm trên cùng bên phải đến điểm dưới cùng bên trái)
+        Vector2 midPoint = (maxPoint + minPoint) / 2;
+
+        // chuyển về vector3
+        Vector3 centerPoint = new Vector3(midPoint.x, 0, midPoint.y);
+
+        if (dimension == "length")
+        {
+            return projectionSizeX > projectionSizeZ ? projectionSizeX : projectionSizeZ;
+        }
+        else if (dimension == "width")
+        {
+            return projectionSizeX > projectionSizeZ ? projectionSizeZ : projectionSizeX;
+        }
+        else if (dimension == "centerCoordinates")
+        {
+            return centerPoint;
+        }
+        else
+        {
+            throw new ArgumentException("Invalid dimension. Use 'length' or 'width' or 'centerCoordinates'!");
+        }
+    }
+
+    private List<Vector3> AddAllVector3ofEntitiesToList(UnityEntity entity, float yValue)
+    {
+        List<Vector3> verticesList = new List<Vector3>();
+
+        foreach (string coordinate in entity.Coordinates)
+        {
+            // Tách các giá trị từ dòng dữ liệu
+            string[] values = coordinate.Split(',');
+
+            if (values.Length == 2 || values.Length == 3)
+            {
+                if (float.TryParse(values[0], out float x) && float.TryParse(values[1], out float z))
+                {
+                    Vector3 vertex = new Vector3(x, yValue, z);
+                    verticesList.Add(vertex);
+                }
+            }
+            else
+            {
+                Debug.Log("Wrong syntax of coordinate");
+            }
+        }
+
+        return verticesList;
+    }
+
+    private void CreateCube(GameObject container, Vector3 startPoint, Vector3 endPoint, float height, float groundHeight)
+    {
+        GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+
+        // Tính toán vị trí và kích thước của cube
+        Vector3 centerPosition = (startPoint + endPoint) / 2f;
+        cube.transform.position = centerPosition;
+        float distance = Vector3.Distance(startPoint, endPoint);
+        cube.transform.localScale = new Vector3(2f, height, distance);
+
+        // Xoay cube để nó hướng từ điểm đầu đến điểm cuối
+        cube.transform.LookAt(endPoint);
+
+        // Chuyển cube vào empty GameObject (container)
+        cube.transform.parent = container.transform;
+
+        // Chuyển cube sang Layer 3D (0 là mặc định)
+        cube.layer = 0;
+
+        // đặt lại vị trí cube trên mặt đất (trên (0,0,0))
+        Vector3 newPosition = cube.transform.position;
+        newPosition.y = groundHeight + (height) / 2;
+        cube.transform.position = newPosition;
+
+        Renderer cubeRenderer = cube.GetComponent<Renderer>();
+        cubeRenderer.material.color = Color.gray;
+    }
+
     #endregion
 
 
