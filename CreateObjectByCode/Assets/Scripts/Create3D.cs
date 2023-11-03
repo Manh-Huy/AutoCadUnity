@@ -33,7 +33,7 @@ public class Create3D : MonoBehaviour
     private bool _hasRoofTop = false;
 
     private List<UnityFloor> _listFloor = new List<UnityFloor>();
-    List<Vector3> listAllVerticesOfWall = new List<Vector3>();
+    List<Vector3> __listAllVerticesOfWall = new List<Vector3>();
     List<GameObject> _listWall = new List<GameObject>();
 
 
@@ -179,7 +179,7 @@ public class Create3D : MonoBehaviour
     private void CreateWall(UnityEntity entity, GameObject wallContainer, float height, float groundHeight)
     {
         List<Vector3> verticesList = AddAllVector3ofEntitiesToList(entity, groundHeight);
-        listAllVerticesOfWall.AddRange(verticesList);
+        __listAllVerticesOfWall.AddRange(verticesList);
 
         for (int i = 0; i < verticesList.Count; i++)
         {
@@ -409,20 +409,20 @@ public class Create3D : MonoBehaviour
 
     private bool isWall(Vector3 positionDoor, Vector3 verticeWall)
     {
-        for (int i = 0; i < listAllVerticesOfWall.Count; i++)
+        for (int i = 0; i < __listAllVerticesOfWall.Count; i++)
         {
             Vector3 startPoint;
             Vector3 endPoint;
 
-            if (i == (listAllVerticesOfWall.Count - 1))
+            if (i == (__listAllVerticesOfWall.Count - 1))
             {
-                startPoint = listAllVerticesOfWall[i];
-                endPoint = listAllVerticesOfWall[0];
+                startPoint = __listAllVerticesOfWall[i];
+                endPoint = __listAllVerticesOfWall[0];
             }
             else
             {
-                startPoint = listAllVerticesOfWall[i];
-                endPoint = listAllVerticesOfWall[i + 1];
+                startPoint = __listAllVerticesOfWall[i];
+                endPoint = __listAllVerticesOfWall[i + 1];
             }
 
             if ((positionDoor == startPoint && verticeWall == endPoint)
@@ -476,124 +476,6 @@ public class Create3D : MonoBehaviour
         stair.transform.localScale = new Vector3(stairWidth * 35, floorHeight * 35, stairLength * 35);
         stair.transform.parent = containerStair.transform;
     }
-
-    private List<Vector3> AddAllVector3ofEntitiesToList(UnityEntity entity)
-    {
-        List<Vector3> verticesList = new List<Vector3>();
-
-        foreach (string coordinate in entity.Coordinates)
-        {
-            // Tách các giá trị từ dòng dữ liệu
-            string[] values = coordinate.Split(',');
-
-            if (values.Length == 3)
-            {
-                if (float.TryParse(values[0], out float x) && float.TryParse(values[1], out float z))
-                {
-                    Vector3 vertex = new Vector3(x, 0, z);
-                    verticesList.Add(vertex);
-                }
-            }
-            else
-            {
-                Debug.Log("Wrong syntax of coordinate");
-            }
-        }
-
-        return verticesList;
-    }
-
-    // Tính độ dài lớn nhất (n= 0), nhì (n = 1), ba (n = 2), ... giữa các điểm trong list
-    public float CalculateNthMaxDistance(List<Vector3> pointList, int n)
-    {
-        if (n <= 0)
-        {
-            throw new ArgumentException("Parameter 'n' must be greater than 0.");
-        }
-
-        List<float> distances = new List<float>();
-
-        for (int i = 0; i < pointList.Count; i++)
-        {
-            for (int j = i + 1; j < pointList.Count; j++)
-            {
-                Vector3 pointA = pointList[i];
-                Vector3 pointB = pointList[j];
-
-                float distance = Vector2.Distance(new Vector2(pointA.x, pointA.y), new Vector2(pointB.x, pointB.y));
-                distances.Add(distance);
-            }
-        }
-
-        // Sort the distances in descending order.
-        distances.Sort((a, b) => -a.CompareTo(b));
-
-        if (n <= distances.Count)
-        {
-            return distances[n - 1];
-        }
-        else
-        {
-            throw new ArgumentException("Parameter 'n' exceeds the number of distances in the list.");
-        }
-    }
-
-    private Vector3 CalculateCenterCoordinates(List<Vector3> verticesList)
-    {
-        Vector3 center = Vector3.zero;
-        foreach (Vector3 coord in verticesList)
-        {
-            center += coord;
-        }
-        center /= verticesList.Count;
-        return center; // vector output sẽ co x và y là trọng tâm còn z có mặc định là 0
-    }
-
-    private void CreateCube(GameObject container, Vector3 startPoint, Vector3 endPoint, float height, float groundHeight)
-    {
-        GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-
-        // Tính toán vị trí và kích thước của cube
-        Vector3 centerPosition = (startPoint + endPoint) / 2f;
-        cube.transform.position = centerPosition;
-        float distance = Vector3.Distance(startPoint, endPoint);
-        cube.transform.localScale = new Vector3(2f, height, distance);
-
-        /*BoxCollider boxCollider = cube.AddComponent<BoxCollider>();
-        boxCollider.size = cube.transform.localScale;*/
-
- 
-
-        // Xoay cube để nó hướng từ điểm đầu đến điểm cuối
-        cube.transform.LookAt(endPoint);
-
-        // Chuyển cube vào empty GameObject (container)
-        cube.transform.parent = container.transform;
-
-        // Chuyển cube sang Layer 3D (0 là mặc định)
-        cube.layer = 0;
-
-        // đặt lại vị trí cube trên mặt đất (trên (0,0,0))
-        Vector3 newPosition = cube.transform.position;
-        newPosition.y = groundHeight + (height) / 2;
-        cube.transform.position = newPosition;
-
-        Renderer cubeRenderer = cube.GetComponent<Renderer>();
-        cubeRenderer.material.color = Color.gray;
-
-        MeshCollider meshCollider = cube.AddComponent<MeshCollider>(); // Thêm component MeshCollider
-
-        MeshFilter meshFilter = cube.GetComponent<MeshFilter>();
-        if (meshFilter != null)
-        {
-            meshCollider.sharedMesh = meshFilter.mesh;
-            meshCollider.convex = true;
-            meshCollider.isTrigger = false;
-        }
-
-        _listWall.Add(cube);
-    }
-    
 
     #endregion
 
@@ -664,7 +546,6 @@ public class Create3D : MonoBehaviour
         List<Vector3> result = new List<Vector3>(4);
         int countX = 0; int countZ = 0;
 
-
         foreach (Vector3 point in list)
         {
             if (point.x == positionWindow.x) countX++;
@@ -707,7 +588,6 @@ public class Create3D : MonoBehaviour
     }
     #endregion
 
-    
     #region Function Create Roof
 
     /*
@@ -744,6 +624,79 @@ public class Create3D : MonoBehaviour
         }
     }
 
+    #endregion
+
+    #region Functions Create Power 
+    private void CreatePower(List<UnityEntity> listEntities, UnityEntity entity, GameObject wallContainer, GameObject powerContainer, float groundHeight)
+    {
+        List<Vector3> listPointOfWall = new List<Vector3>();
+        Vector3 positionPower = new Vector3();
+        Quaternion rotation = Quaternion.Euler(-90f, -90f, 0f);
+
+        string[] powerValue = entity.Coordinates[0].Split(',');
+        if (powerValue.Length == 3)
+        {
+            if (float.TryParse(powerValue[0], out float xPower) && float.TryParse(powerValue[1], out float zPower))
+            {
+                positionPower.x = xPower;
+                positionPower.y = groundHeight;
+                positionPower.z = zPower;
+
+                /*foreach (UnityEntity unityEntity in listEntities)
+                {
+                    if (unityEntity.TypeOfUnityEntity == "Wall" && unityEntity.ObjectType == "LwPolyline")
+                    {
+                        foreach (string coordinate in unityEntity.Coordinates)
+                        {
+                            string[] lineValues = coordinate.Split(',');
+                            if (lineValues.Length == 2)
+                            {
+                                if (float.TryParse(lineValues[0], out float xWall) && float.TryParse(lineValues[1], out float zWall))
+                                {
+                                }
+                            }
+                        }
+                    }
+                }*/
+            }
+        }
+
+        GameObject power = Instantiate(_powerPrefab, positionPower, rotation);
+        float customScale = 70.0f;
+        power.transform.localScale = _windowPrefab.transform.localScale * customScale;
+        //power.transform.localScale += new Vector3(60f, -3f, 10f);
+        power.transform.parent = powerContainer.transform;
+
+        BoxCollider boxCollider = power.AddComponent<BoxCollider>();
+        boxCollider.size = new Vector3(2.2f, 0.25f, 0.4f);
+        boxCollider.center = new Vector3(0, 0.3f, -0.1f);
+
+        //HandleCollision(_listWall, power);
+    }
+
+    private void HandleCollision(List<GameObject> listWall, GameObject power)
+    {
+        // Kiểm tra va chạm hoặc nằm đè vào cube
+        BoxCollider powerCollider = power.GetComponent<BoxCollider>();
+        if (powerCollider != null)
+        {
+            foreach (GameObject wall in listWall)
+            {
+                MeshCollider wallCollider = wall.GetComponent<MeshCollider>();
+                if (wallCollider != null)
+                {
+                    if (powerCollider.bounds.Intersects(wallCollider.bounds))
+                    {
+                        Debug.Log("AAAAAA");
+                        Vector3 newPosition = power.transform.position;
+                        newPosition.z += 180f;
+                        power.transform.position = newPosition;
+                    }
+                }
+            }
+        }
+
+    }
     #endregion
 
     #region Other Functions
@@ -860,76 +813,4 @@ public class Create3D : MonoBehaviour
 
     #endregion
 
-    #region Functions Create Power 
-    private void CreatePower(List<UnityEntity> listEntities, UnityEntity entity, GameObject wallContainer, GameObject powerContainer, float groundHeight)
-    {
-        List<Vector3> listPointOfWall = new List<Vector3>();
-        Vector3 positionPower = new Vector3();
-        Quaternion rotation = Quaternion.Euler(-90f, -90f, 0f);
-
-        string[] powerValue = entity.Coordinates[0].Split(',');
-        if (powerValue.Length == 3)
-        {
-            if (float.TryParse(powerValue[0], out float xPower) && float.TryParse(powerValue[1], out float zPower))
-            {
-                positionPower.x = xPower;
-                positionPower.y = groundHeight;
-                positionPower.z = zPower;
-
-                /*foreach (UnityEntity unityEntity in listEntities)
-                {
-                    if (unityEntity.TypeOfUnityEntity == "Wall" && unityEntity.ObjectType == "LwPolyline")
-                    {
-                        foreach (string coordinate in unityEntity.Coordinates)
-                        {
-                            string[] lineValues = coordinate.Split(',');
-                            if (lineValues.Length == 2)
-                            {
-                                if (float.TryParse(lineValues[0], out float xWall) && float.TryParse(lineValues[1], out float zWall))
-                                {
-                                }
-                            }
-                        }
-                    }
-                }*/
-            }
-        }
-
-        GameObject power = Instantiate(_powerPrefab, positionPower, rotation);
-        float customScale = 70.0f;
-        power.transform.localScale = _windowPrefab.transform.localScale * customScale;
-        //power.transform.localScale += new Vector3(60f, -3f, 10f);
-        power.transform.parent = powerContainer.transform;
-
-        BoxCollider boxCollider = power.AddComponent<BoxCollider>();
-        boxCollider.size = new Vector3(2.2f, 0.25f, 0.4f);
-        boxCollider.center = new Vector3(0, 0.3f, -0.1f);
-
-        //HandleCollision(_listWall, power);
-    }
-
-    private void HandleCollision(List<GameObject> listWall, GameObject power)
-    {
-        // Kiểm tra va chạm hoặc nằm đè vào cube
-        BoxCollider powerCollider = power.GetComponent<BoxCollider>();
-        if(powerCollider != null)
-        {
-            foreach (GameObject wall in listWall)
-            {
-                MeshCollider wallCollider = wall.GetComponent<MeshCollider>();
-                if(wallCollider != null)
-                {
-                    if (powerCollider.bounds.Intersects(wallCollider.bounds))
-                    {
-                        Debug.Log("AAAAAA");
-                        Vector3 newPosition = power.transform.position;
-                        newPosition.z += 180f;
-                        power.transform.position = newPosition;
-                    }
-                }
-            }
-        }
-
-    }
-    #endregion
 }
