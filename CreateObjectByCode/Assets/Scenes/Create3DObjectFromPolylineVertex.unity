@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028334, g: 0.2257134, b: 0.30692226, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -880,6 +880,7 @@ MonoBehaviour:
   _doorPrefab: {fileID: 7045018640448034017, guid: fe8ea53b3543f394a96599634e13c2f4, type: 3}
   _stairPrefab: {fileID: 7745906642624567150, guid: f643d98c8ac5d1b49b11c7d13ce2e370, type: 3}
   _windowPrefab: {fileID: 6054821994951442945, guid: bd44877d8c14ea4459945ac6d90b0e3c, type: 3}
+  _roofTopPrefab: {fileID: 6196633440644838523, guid: 3ca29eda7a9a996409b6911b65463acd, type: 3}
   _powerPrefab: {fileID: 8498418051937864479, guid: 142b298b7edf8cb46bf794849a7d2224, type: 3}
 --- !u!114 &2033603328
 MonoBehaviour:
