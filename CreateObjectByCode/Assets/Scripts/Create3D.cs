@@ -27,6 +27,8 @@ public class Create3D : MonoBehaviour
 
     [SerializeField]
     private GameObject _powerPrefab;
+
+    [SerializeField]
     private GameObject _roofTopPrefab;
 
     [SerializeField]
@@ -39,13 +41,13 @@ public class Create3D : MonoBehaviour
 
     private void Start()
     {
-        //readButton.onClick.AddListener(ReadJSON);
-        //createButton.onClick.AddListener(CreateAllEntities);
+        ReadJSON();
+        CreateAllEntities();
     }
     public void ReadJSON()
     {
-        string jsonPath = EditorUtility.OpenFilePanel("Select JSON File", "", "json");
-        //string jsonPath = @"C:\Users\house.json";
+        //string jsonPath = EditorUtility.OpenFilePanel("Select JSON File", "", "json");
+        string jsonPath = @"C:\Users\house2.json";
 
 
         if (!string.IsNullOrEmpty(jsonPath))
@@ -62,10 +64,11 @@ public class Create3D : MonoBehaviour
                     _listFloor.Add(floor);
                 }
 
-                //if (unityArchitecture.TypeOfRoof == "Rooftop")
-                //{
-                //    _hasRoofTop = true;
-                //}
+
+                if (unityArchitecture.TypeOfRoof == "Rooftop")
+                {
+                    _hasRoofTop = true;
+                }
             }
             catch (Exception ex)
             {

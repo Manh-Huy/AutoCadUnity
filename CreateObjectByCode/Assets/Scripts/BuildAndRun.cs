@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class BuildAndRun : MonoBehaviour
 {
-    [MenuItem("MyMenu/Build and Run")]
+    /*[MenuItem("MyMenu/Build and Run")]
     public static void BuildAndRunGame()
     {
         // Build the Unity project
@@ -16,5 +16,5 @@ public class BuildAndRun : MonoBehaviour
         // Run the built .exe
         string exePath = System.IO.Path.Combine(buildPath, "CreateObjectByCode.exe");
         Process.Start(exePath);
-    }
+    }*/
 }
