@@ -17,6 +17,11 @@ using System.Net;
 public class Create3D : MonoBehaviour
 {
     [SerializeField]
+    private GameObject _houseObject;
+
+    [SerializeField]
+    private GameObject _camera;
+    [SerializeField]
     private GameObject _doorPrefab;
 
     [SerializeField]
@@ -31,7 +36,6 @@ public class Create3D : MonoBehaviour
     [SerializeField]
     private GameObject _roofTopPrefab;
 
-    [SerializeField]
     private bool _hasRoofTop = false;
 
     private List<UnityFloor> _listFloor = new List<UnityFloor>();
@@ -48,7 +52,7 @@ public class Create3D : MonoBehaviour
     public void ReadJSON()
     {
         //string jsonPath = EditorUtility.OpenFilePanel("Select JSON File", "", "json");
-        string jsonPath = @"C:\Users\house2.json";
+        string jsonPath = @"F:\Desktop\house2.json";
 
 
         if (!string.IsNullOrEmpty(jsonPath))
@@ -88,7 +92,6 @@ public class Create3D : MonoBehaviour
 
         foreach (UnityFloor floor in _listFloor)
         {
-            GameObject floorContainer = new GameObject("Floor Container");
             GameObject wallContainer = new GameObject("Wall Container");
             GameObject doorContainer = new GameObject("Door Container");
             GameObject stairContainer = new GameObject("Stair Container");
@@ -96,11 +99,7 @@ public class Create3D : MonoBehaviour
             GameObject powerContainer = new GameObject("Power Container");
             float floorHeight = 0;
 
-            wallContainer.transform.parent = floorContainer.transform;
-            doorContainer.transform.parent = floorContainer.transform;
-            stairContainer.transform.parent = floorContainer.transform;
-            windowContainer.transform.parent = floorContainer.transform;
-            powerContainer.transform.parent = floorContainer.transform;
+            
 
             // stair
             List<Vector3> verticeStairsList = new List<Vector3>();
@@ -159,12 +158,6 @@ public class Create3D : MonoBehaviour
                 }
             }
 
-            Vector3 centerPointEachFloor = (Vector3)CalculateDimensionAndCenterPoint(coordinatesWallEachFloorList, "centerCoordinates");
-
-            if (floorIndex == 0)
-            {
-                _centerPoint = centerPointEachFloor;
-            }
             // create Stair
             if (verticeStairsList.Count > 0)
             {
@@ -174,19 +167,51 @@ public class Create3D : MonoBehaviour
                 CreateStair(stairPosition, stairLength, stairWidth, stairContainer, floorHeight, groundHeight);
             }
 
+            // Find center point and change position each floor
+            Vector3 centerPointEachFloor = (Vector3)CalculateDimensionAndCenterPoint(coordinatesWallEachFloorList, "centerCoordinates");
+
+            if (floorIndex == 0) // tầng 1
+            {
+                _centerPoint = centerPointEachFloor;
+            }
+            /*
+             * B1: tạo object cha (floorContainer)
+             * B2: di chuyển nó đến vị trí trọng tâm của tầng đó
+             * B3: đưa các object con vào object cha
+             * B4: di chuyển object cha vào vị trí trung tâm của tầng 1
+             */
+            GameObject floorContainer = new GameObject("Floor Container"); //B1
+            floorContainer.transform.position = centerPointEachFloor; //B2
+
+            //B3
+            wallContainer.transform.parent = floorContainer.transform;
+            doorContainer.transform.parent = floorContainer.transform;
+            stairContainer.transform.parent = floorContainer.transform;
+            windowContainer.transform.parent = floorContainer.transform;
+            powerContainer.transform.parent = floorContainer.transform;
+
+            // Vì roof là object con của tầng cuối cùng nên tạo CreateRoof tại đây
+            // create Roof
+            if (coordinatesLastFloorOfWallList.Count > 0)
+            {
+                Vector3 roofPosition = (Vector3)CalculateDimensionAndCenterPoint(coordinatesLastFloorOfWallList, "centerCoordinates");
+                float roofLength = (float)CalculateDimensionAndCenterPoint(coordinatesLastFloorOfWallList, "length"); // chiều dài của roof
+                float roofWidth = (float)CalculateDimensionAndCenterPoint(coordinatesLastFloorOfWallList, "width"); // chiều rộng của roof
+                // đang set mặc định chiều cao của rooftop =  75% (trung bình cộng chiều cao các tầng ngôi nhà)
+                // vị trí y (chiều cao đặt roof) = groundHeight + floorHeight vì nó nằm trên tầng cuối cùng
+                CreateRoof(floorContainer, roofPosition, roofLength, roofWidth, (groundHeight / _listFloor.Count) * 0.75f, (groundHeight + floorHeight));
+            }
+
+            floorContainer.transform.position = _centerPoint; //B4
+
+            // đưa floorContainer vào object cha (House) và đưa nó vào vị trí trong camera cho dễ nhìn
+            floorContainer.transform.parent = _houseObject.transform;
+            _houseObject.transform.position = _camera.transform.position;
+
+            
             floorIndex++;
             // cộng với chiều cao tầng này để bắt đầu dựng tầng sau
             groundHeight += floorHeight;
-        }
-
-        // create Roof
-        if (coordinatesLastFloorOfWallList.Count > 0)
-        {
-            Vector3 roofPosition = (Vector3)CalculateDimensionAndCenterPoint(coordinatesLastFloorOfWallList, "centerCoordinates");
-            float roofLength = (float)CalculateDimensionAndCenterPoint(coordinatesLastFloorOfWallList, "length"); // chiều dài của roof
-            float roofWidth = (float)CalculateDimensionAndCenterPoint(coordinatesLastFloorOfWallList, "width"); // chiều rộng của roof
-            // đang set mặc định chiều cao của rooftop =  75% (trung bình cộng chiều cao các tầng ngôi nhà)
-            CreateRoof(roofPosition, roofLength, roofWidth, (groundHeight / _listFloor.Count) * 0.75f, groundHeight);
         }
     }
 
@@ -609,7 +634,7 @@ public class Create3D : MonoBehaviour
      * scale roof tỉ lệ với cube (1,1,1) là (0.25, 0.25, 0.925)
      * cube (x,y,z) -> roof (x,z,y) -> salce roof = (x là chiều ngang, y là chiều chiều dài, z là chiều cao)
      */
-    private void CreateRoof(Vector3 position, float roofLength, float roofWidth, float roofHeight, float groundHeight)
+    private void CreateRoof(GameObject container, Vector3 position, float roofLength, float roofWidth, float roofHeight, float groundHeight)
     {
         // create roof
         GameObject roof = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -637,6 +662,8 @@ public class Create3D : MonoBehaviour
             roofTop.transform.localScale = new Vector3(roofWidth * scaleXYRatio, roofLength * scaleXYRatio, roofHeight * scaleZRatio);
             roofTop.transform.parent = roof.transform;
         }
+
+        roof.transform.parent = container.transform;
     }
 
     #endregion

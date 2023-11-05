@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028334, g: 0.2257134, b: 0.30692226, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -422,7 +422,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 564870342}
   m_CullTransparentMesh: 1
---- !u!1 &633847850
+--- !u!1 &741928463
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -430,41 +430,28 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 633847852}
-  - component: {fileID: 633847851}
+  - component: {fileID: 741928464}
   m_Layer: 0
-  m_Name: BuildManager
+  m_Name: House
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!114 &633847851
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 633847850}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 39582f7723b965845ace3b27700cfc58, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!4 &633847852
+  m_IsActive: 1
+--- !u!4 &741928464
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 633847850}
+  m_GameObject: {fileID: 741928463}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 508.05457, y: 460.19406, z: 619.00287}
+  m_LocalPosition: {x: 508.3595, y: 200.50746, z: 50}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &796049214
 GameObject:
@@ -895,7 +882,7 @@ Transform:
   - {fileID: 307492842}
   - {fileID: 2039765865}
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1915631938
 MonoBehaviour:
@@ -944,12 +931,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db485dd32cf4a3d42b6bd0a6b4475802, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _houseObject: {fileID: 741928463}
+  _camera: {fileID: 1915631935}
   _doorPrefab: {fileID: 7045018640448034017, guid: fe8ea53b3543f394a96599634e13c2f4, type: 3}
   _stairPrefab: {fileID: 7745906642624567150, guid: f643d98c8ac5d1b49b11c7d13ce2e370, type: 3}
   _windowPrefab: {fileID: 6054821994951442945, guid: bd44877d8c14ea4459945ac6d90b0e3c, type: 3}
   _powerPrefab: {fileID: 8498418051937864479, guid: 142b298b7edf8cb46bf794849a7d2224, type: 3}
   _roofTopPrefab: {fileID: 6196633440644838523, guid: 3ca29eda7a9a996409b6911b65463acd, type: 3}
   _hasRoofTop: 0
+  _centerPoint: {x: 0, y: 0, z: 0}
 --- !u!114 &2033603328
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1228,5 +1218,5 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
