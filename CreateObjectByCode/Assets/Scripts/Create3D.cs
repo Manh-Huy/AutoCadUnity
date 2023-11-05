@@ -122,11 +122,11 @@ public class Create3D : MonoBehaviour
                 //}
 
                 floorHeight = 100f; // thay thế các dòng comment trên (set cứng)
+                float wallHeight = 100f; // thay thế dòng trên (set cứng)
 
                 if (entity.TypeOfUnityEntity == "Wall" && entity.ObjectType == "LwPolyline")
                 {
                     //float wallHeight = entityHeight;
-                    float wallHeight = 100f; // thay thế dòng trên (set cứng)
 
                     CreateWall(entity, wallContainer, wallHeight, groundHeight);
 
@@ -141,7 +141,7 @@ public class Create3D : MonoBehaviour
 
                 if (entity.ObjectType == "Insert" && entity.TypeOfUnityEntity == "Door")
                 {
-                    CreateDoor(floor.ListEntities, entity, doorContainer, groundHeight);
+                    CreateDoor(floor.ListEntities, entity, doorContainer, groundHeight, wallHeight);
                 }
 
                 if (entity.ObjectType == "Line" && entity.TypeOfUnityEntity == "Stair")
@@ -249,7 +249,7 @@ public class Create3D : MonoBehaviour
 
     #region Functions Create Door
 
-    private void CreateDoor(List<UnityEntity> listEntities, UnityEntity entity, GameObject doorContainer, float groundheight)
+    private void CreateDoor(List<UnityEntity> listEntities, UnityEntity entity, GameObject doorContainer, float groundheight, float wallHeight)
     {
         List<Vector3> listPoint = new List<Vector3>();
         Vector3 positionDoor = new Vector3();
@@ -335,7 +335,8 @@ public class Create3D : MonoBehaviour
         }
         float customScale = 50.0f;
         GameObject door = Instantiate(_doorPrefab, positionDoor, rotation);
-        door.transform.localScale = _doorPrefab.transform.localScale * customScale;
+        Vector3 currentScale = door.transform.localScale;
+        door.transform.localScale = new Vector3(currentScale.x * 50f, distanceResult * 50f, wallHeight * 50f);
         door.transform.parent = doorContainer.transform;
         MeshRenderer doorRenderer = door.GetComponent<MeshRenderer>();
         if (entity.Color != "")
