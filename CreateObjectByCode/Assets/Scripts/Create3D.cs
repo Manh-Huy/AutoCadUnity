@@ -36,6 +36,7 @@ public class Create3D : MonoBehaviour
 
     private List<UnityFloor> _listFloor = new List<UnityFloor>();
     List<Vector3> __listAllVerticesOfWall = new List<Vector3>();
+    public Vector3 _centerPoint = new Vector3();
     List<GameObject> _listWall = new List<GameObject>();
 
 
@@ -82,6 +83,7 @@ public class Create3D : MonoBehaviour
     {
         int floorIndex = 0;
         float groundHeight = 0;
+
         List<Vector3> coordinatesLastFloorOfWallList = new List<Vector3>();
 
         foreach (UnityFloor floor in _listFloor)
@@ -105,6 +107,8 @@ public class Create3D : MonoBehaviour
             Vector3 stairPosition = new Vector3();
             float stairLength; // chiều dài của cầu thang
             float stairWidth;  // chiều rộng của cầu thang
+
+            List<Vector3> coordinatesWallEachFloorList = new List<Vector3>();
 
             foreach (UnityEntity entity in floor.ListEntities)
             {
@@ -130,6 +134,8 @@ public class Create3D : MonoBehaviour
                     {
                         coordinatesLastFloorOfWallList.AddRange(AddAllVector3ofEntitiesToList(entity, 0));
                     }
+
+                    coordinatesWallEachFloorList.AddRange(AddAllVector3ofEntitiesToList(entity, 0));
                 }
 
                 if (entity.ObjectType == "Insert" && entity.TypeOfUnityEntity == "Door")
@@ -153,6 +159,12 @@ public class Create3D : MonoBehaviour
                 }
             }
 
+            Vector3 centerPointEachFloor = (Vector3)CalculateDimensionAndCenterPoint(coordinatesWallEachFloorList, "centerCoordinates");
+
+            if (floorIndex == 0)
+            {
+                _centerPoint = centerPointEachFloor;
+            }
             // create Stair
             if (verticeStairsList.Count > 0)
             {
