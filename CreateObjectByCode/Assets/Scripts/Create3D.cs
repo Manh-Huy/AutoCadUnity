@@ -13,6 +13,9 @@ using UnityEditor;
 using UnityEngine.UIElements;
 using Newtonsoft.Json.Linq;
 using System.Net;
+using System.Drawing;
+using SystemColor = System.Drawing.Color;
+using UnityColor = UnityEngine.Color;
 
 public class Create3D : MonoBehaviour
 {
@@ -52,7 +55,8 @@ public class Create3D : MonoBehaviour
     public void ReadJSON()
     {
         //string jsonPath = EditorUtility.OpenFilePanel("Select JSON File", "", "json");
-        string jsonPath = @"F:\Desktop\house2.json";
+        //string jsonPath = @"F:\Desktop\house2.json";
+        string jsonPath = @"D:\house2.json";
 
 
         if (!string.IsNullOrEmpty(jsonPath))
@@ -99,7 +103,7 @@ public class Create3D : MonoBehaviour
             GameObject powerContainer = new GameObject("Power Container");
             float floorHeight = 0;
 
-            
+
 
             // stair
             List<Vector3> verticeStairsList = new List<Vector3>();
@@ -208,7 +212,7 @@ public class Create3D : MonoBehaviour
             floorContainer.transform.parent = _houseObject.transform;
             _houseObject.transform.position = _camera.transform.position;
 
-            
+
             floorIndex++;
             // cộng với chiều cao tầng này để bắt đầu dựng tầng sau
             groundHeight += floorHeight;
@@ -218,6 +222,9 @@ public class Create3D : MonoBehaviour
     #region Function Create Wall
     private void CreateWall(UnityEntity entity, GameObject wallContainer, float height, float groundHeight)
     {
+        string color = entity.Color;
+
+
         List<Vector3> verticesList = AddAllVector3ofEntitiesToList(entity, groundHeight);
         __listAllVerticesOfWall.AddRange(verticesList);
 
@@ -236,7 +243,7 @@ public class Create3D : MonoBehaviour
                 startPoint = verticesList[i];
                 endPoint = verticesList[i + 1];
             }
-            CreateCube(wallContainer, startPoint, endPoint, height, groundHeight);
+            CreateCube(wallContainer, startPoint, endPoint, height, groundHeight, color);
         }
     }
 
@@ -332,7 +339,13 @@ public class Create3D : MonoBehaviour
         GameObject door = Instantiate(_doorPrefab, positionDoor, rotation);
         door.transform.localScale = _doorPrefab.transform.localScale * customScale;
         door.transform.parent = doorContainer.transform;
-
+        MeshRenderer doorRenderer = door.GetComponent<MeshRenderer>();
+        if (entity.Color != "")
+        {
+            SystemColor systemColor = GetColor(entity.Color);
+            UnityColor resultColor = new Color32(systemColor.R, systemColor.G, systemColor.B, systemColor.A);
+            doorRenderer.material.color = resultColor;
+        }
     }
 
     private List<Vector3> HandleListPoint(List<Vector3> list, Vector3 positionDoor)
@@ -579,6 +592,14 @@ public class Create3D : MonoBehaviour
         window.transform.localScale = _windowPrefab.transform.localScale * customScale;
         window.transform.localScale += new Vector3(60f, -3f, 10f);
         window.transform.parent = windowContainer.transform;
+
+        MeshRenderer windowRenderer = window.GetComponent<MeshRenderer>();
+        if (entity.Color != "")
+        {
+            SystemColor systemColor = GetColor(entity.Color);
+            UnityColor resultColor = new Color32(systemColor.R, systemColor.G, systemColor.B, systemColor.A);
+            windowRenderer.material.color = resultColor;
+        }
     }
 
     private List<Vector3> HandleListPointOfWall(List<Vector3> list, Vector3 positionWindow)
@@ -646,7 +667,7 @@ public class Create3D : MonoBehaviour
         roof.transform.position = new Vector3(position.x, (groundHeight + thicknessOfbottomRoof / 2f), position.z);
 
         Renderer cubeRenderer = roof.GetComponent<Renderer>();
-        cubeRenderer.material.color = Color.gray;
+        cubeRenderer.material.color = UnityColor.gray;
 
         // create rooftop
         if (_hasRoofTop == true)
@@ -825,7 +846,7 @@ public class Create3D : MonoBehaviour
         return verticesList;
     }
 
-    private void CreateCube(GameObject container, Vector3 startPoint, Vector3 endPoint, float height, float groundHeight)
+    private void CreateCube(GameObject container, Vector3 startPoint, Vector3 endPoint, float height, float groundHeight, string color)
     {
         GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
@@ -850,7 +871,37 @@ public class Create3D : MonoBehaviour
         cube.transform.position = newPosition;
 
         Renderer cubeRenderer = cube.GetComponent<Renderer>();
-        cubeRenderer.material.color = Color.gray;
+
+        if (color == "")
+        {
+            cubeRenderer.material.color = UnityColor.gray;
+        }
+        else
+        {
+            SystemColor systemColor = GetColor(color);
+            UnityColor resultColor = new Color32(systemColor.R, systemColor.G, systemColor.B, systemColor.A);
+            cubeRenderer.material.color = resultColor;
+        }
+    }
+
+    public SystemColor GetColor(string color)
+    {
+        SystemColor resultColor = SystemColor.Gray;
+        string[] colorValues = color.Split(", ");
+
+        if (colorValues.Length == 1)
+        {
+            string result = colorValues[0];
+            resultColor = SystemColor.FromName(result);
+        }
+        else if (colorValues.Length == 3)
+        {
+            int r = int.Parse(colorValues[0]);
+            int g = int.Parse(colorValues[1]);
+            int b = int.Parse(colorValues[2]);
+            resultColor = SystemColor.FromArgb(r, g, b);
+        }
+        return resultColor;
     }
 
     #endregion
