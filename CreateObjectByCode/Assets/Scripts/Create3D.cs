@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Xml.Linq;
@@ -54,10 +54,8 @@ public class Create3D : MonoBehaviour
     }
     public void ReadJSON()
     {
-        //string jsonPath = EditorUtility.OpenFilePanel("Select JSON File", "", "json");
-        //string jsonPath = @"F:\Desktop\house2.json";
-        string jsonPath = @"D:\house2.json";
-
+        string jsonPath = "Build\\house2.json";
+        //string jsonPath = "house2.json";
 
         if (!string.IsNullOrEmpty(jsonPath))
         {
