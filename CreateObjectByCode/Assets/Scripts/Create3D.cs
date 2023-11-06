@@ -16,6 +16,9 @@ using System.Net;
 using System.Drawing;
 using SystemColor = System.Drawing.Color;
 using UnityColor = UnityEngine.Color;
+using UnityEngine.Experimental.GlobalIllumination;
+using JetBrains.Annotations;
+using System.Reflection;
 
 public class Create3D : MonoBehaviour
 {
@@ -54,7 +57,7 @@ public class Create3D : MonoBehaviour
     }
     public void ReadJSON()
     {
-        string jsonPath = "Build\\house2.json";
+        string jsonPath = "Build\\PlaneFloor1.json";
         //string jsonPath = "house2.json";
 
         if (!string.IsNullOrEmpty(jsonPath))
@@ -94,6 +97,7 @@ public class Create3D : MonoBehaviour
 
         foreach (UnityFloor floor in _listFloor)
         {
+            GameObject planeContainer = new GameObject("Plane Container");
             GameObject wallContainer = new GameObject("Wall Container");
             GameObject doorContainer = new GameObject("Door Container");
             GameObject stairContainer = new GameObject("Stair Container");
@@ -110,6 +114,125 @@ public class Create3D : MonoBehaviour
             float stairWidth;  // chiều rộng của cầu thang
 
             List<Vector3> coordinatesWallEachFloorList = new List<Vector3>();
+
+            {
+                List<Vector2> listPoint = new List<Vector2>();
+
+                foreach (UnityEntity entity in floor.ListEntities)
+                {
+
+
+                    if (entity.TypeOfUnityEntity == "Wall" && entity.ObjectType == "LwPolyline")
+                    {
+                        foreach (string coordinate in entity.Coordinates)
+                        {
+                            string[] pointValues = coordinate.Split(',');
+                            if (pointValues.Length == 2)
+                            {
+                                if (float.TryParse(pointValues[0], out float xWall) && float.TryParse(pointValues[1], out float zWall))
+                                {
+                                    listPoint.Add(new Vector2(xWall, zWall));
+                                }
+                            }
+                        }
+                    }
+                }
+
+                List<Vector2> mainPlane = new List<Vector2>();
+                Vector2 maxPoint = FindPointMaxOfPlane(listPoint);
+                mainPlane.Add(maxPoint);
+                mainPlane = FindOtherPointOfPlane(listPoint, mainPlane);
+
+                float width = CalculateDistance(mainPlane[0].x, mainPlane[0].y, mainPlane[1].x, mainPlane[1].y);
+                float length = CalculateDistance(mainPlane[1].x, mainPlane[1].y, mainPlane[2].x, mainPlane[2].y);
+
+                GameObject plane = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                mainPlane = ModifyDataInPoint(mainPlane);
+                Vector3 centerPosition = CalculateCenterPositionEachPlane(mainPlane, 90f);
+                plane.transform.localPosition = centerPosition;
+                plane.transform.localScale = new Vector3(length, 5f, width);
+                // Chuyển cube sang Layer 3D (0 là mặc định)
+                plane.layer = 0;
+
+                Renderer cubeRenderer = plane.GetComponent<Renderer>();
+                cubeRenderer.material.color = UnityColor.gray;
+                plane.transform.parent = planeContainer.transform;
+
+                listPoint = DeletePointInMainPlane(listPoint, mainPlane);
+
+                float topLimit = mainPlane[0].y;
+                float bottomLimit = mainPlane[1].y;
+                float leftLimit = mainPlane[2].x;
+                float rightLimit = mainPlane[0].x;
+
+                #region Bottom Plane
+                List<Vector2> pointBottomPlane = new List<Vector2>();
+                foreach (Vector2 point in listPoint)
+                {
+                    if (point.y < bottomLimit)
+                    {
+                        pointBottomPlane.Add(point);
+                    }
+                }
+
+                pointBottomPlane = CleanListTopAndBottomToCreatePlane(pointBottomPlane);
+
+                if (pointBottomPlane.Count > 0)
+                {
+                    for (int i = 0; i < pointBottomPlane.Count - 1; i++)
+                    {
+                        if (pointBottomPlane[i].y == pointBottomPlane[i + 1].y)
+                        {
+                            CreateBottomPlane(bottomLimit, planeContainer, pointBottomPlane[i], pointBottomPlane[i + 1]);
+                        }
+                    }
+                }
+                #endregion
+
+                #region Left Plane 
+                // cái left này có bug khi bước nhảy là 1 như top, bottom
+                List<Vector2> pointLeftPlane = new List<Vector2>();
+                foreach (Vector2 point in listPoint)
+                {
+                    if (point.x < leftLimit)
+                    {
+                        pointLeftPlane.Add(point);
+                    }
+                }
+
+                if (pointLeftPlane.Count > 0)
+                {
+                    for (int i = 0; i < pointBottomPlane.Count; i += 2)
+                    {
+                        CreateLeftPlane(leftLimit, planeContainer, pointLeftPlane[i], pointLeftPlane[i + 1]);
+                    }
+                }
+                #endregion
+
+                #region Top Plane 
+                List<Vector2> pointTopPlane = new List<Vector2>();
+                foreach (Vector2 point in listPoint)
+                {
+                    if (point.y > topLimit)
+                    {
+                        pointTopPlane.Add(point);
+                    }
+                }
+
+                pointTopPlane = CleanListTopAndBottomToCreatePlane(pointTopPlane);
+
+                if (pointTopPlane.Count > 0)
+                {
+                    for (int i = 0; i < pointTopPlane.Count - 1; i++)
+                    {
+                        if (pointTopPlane[i].y == pointTopPlane[i + 1].y)
+                        {
+                            CreateTopPlane(topLimit, planeContainer, pointTopPlane[i], pointTopPlane[i + 1]);
+                        }
+                    }
+                }
+                #endregion
+            }
 
             foreach (UnityEntity entity in floor.ListEntities)
             {
@@ -186,6 +309,7 @@ public class Create3D : MonoBehaviour
             floorContainer.transform.position = centerPointEachFloor; //B2
 
             //B3
+            planeContainer.transform.parent = floorContainer.transform;
             wallContainer.transform.parent = floorContainer.transform;
             doorContainer.transform.parent = floorContainer.transform;
             stairContainer.transform.parent = floorContainer.transform;
@@ -215,6 +339,319 @@ public class Create3D : MonoBehaviour
             // cộng với chiều cao tầng này để bắt đầu dựng tầng sau
             groundHeight += floorHeight;
         }
+    }
+
+    private Vector2 FindPointMaxOfPlane(List<Vector2> listPoint)
+    {
+        bool isFind = false;
+        bool dontFoundInZ = false;
+        bool dontFoundInX = true;
+        float maxX = float.MinValue;
+        float maxZ = float.MinValue;
+        float xTop = float.MaxValue;
+        float zTop = float.MaxValue;
+        Vector2 maxPoint = new Vector2(maxX, maxZ);
+
+        // điểm này là điêm giả tưởng có thể nó sẽ không tồn tại trong bản vẽ
+        // , dùng nó để khi duyệt Z không được, ta sẽ back lại và duyệt X
+        Vector2 maximumPoint = new Vector2(float.MinValue, float.MinValue);
+
+        foreach (Vector2 point in listPoint)
+        {
+            // Tìm số lớn nhất và bé nhất trên trục x
+            maximumPoint.x = Mathf.Max(maximumPoint.x, point.x);
+
+            // Tìm số lớn nhất và bé nhất trên trục z
+            maximumPoint.y = Mathf.Max(maximumPoint.y, point.y);
+        }
+
+        while (isFind == false)
+        {
+            maxX = float.MinValue;
+            maxZ = float.MinValue;
+            int countFor1 = 0;
+            int countFor2 = 0;
+            foreach (Vector2 point in listPoint)
+            {
+                if (point.x > maxX && point.x < xTop) maxX = point.x;
+                if (point.y > maxZ && point.y < zTop) maxZ = point.y;
+                countFor1++;
+            }
+            maxPoint = new Vector2(maxX, maxZ);
+            if (dontFoundInZ == false)
+            {
+                foreach (Vector2 point in listPoint)
+                {
+                    countFor2++;
+                    if (maxPoint == point)
+                    {
+                        return maxPoint;
+                    }
+                }
+                if (maxPoint.y == float.MinValue)
+                {
+                    dontFoundInZ = true;
+                    dontFoundInX = false;
+                    zTop = maximumPoint.y;
+                }
+                else
+                {
+                    zTop = maxPoint.y;
+                }
+            }
+            if (dontFoundInX == false)
+            {
+                foreach (Vector2 point in listPoint)
+                {
+                    countFor2++;
+                    if (maxPoint == point)
+                    {
+                        return maxPoint;
+                    }
+                }
+                if (maxPoint.x == float.MinValue)
+                {
+                    return new Vector2(0f, 0f);
+                }
+                else
+                {
+                    xTop = maxPoint.x;
+                }
+            }
+
+
+        }
+        return maxPoint;
+    }
+
+    private List<Vector2> FindOtherPointOfPlane(List<Vector2> listPoint, List<Vector2> mainPlane)
+    {
+        int countPointMainPlane = 1;
+
+        if (countPointMainPlane == 1)
+        {
+            Vector2 currentPoint = mainPlane[mainPlane.Count - 1];
+            foreach (Vector2 point in listPoint)
+            {
+                if (point.x == currentPoint.x && point.y < currentPoint.y)
+                {
+                    currentPoint = point;
+                }
+            }
+            mainPlane.Add(currentPoint);
+            countPointMainPlane++;
+        }
+
+        if (countPointMainPlane == 2)
+        {
+            Vector2 currentPoint = mainPlane[mainPlane.Count - 1];
+            foreach (Vector2 point in listPoint)
+            {
+                if (point.y == currentPoint.y && point.x < currentPoint.x)
+                {
+                    currentPoint = point;
+                }
+            }
+            mainPlane.Add(currentPoint);
+            countPointMainPlane++;
+        }
+
+        if (countPointMainPlane == 3)
+        {
+            Vector2 currentPoint = mainPlane[mainPlane.Count - 1];
+            foreach (Vector2 point in listPoint)
+            {
+                if (point.x == currentPoint.x && point.y > currentPoint.y)
+                {
+                    currentPoint = point;
+                }
+            }
+            if (currentPoint.y != mainPlane[0].y)
+            {
+                currentPoint.y = mainPlane[0].y;
+            }
+            mainPlane.Add(currentPoint);
+            countPointMainPlane++;
+        }
+
+        return mainPlane;
+    }
+
+    private Vector3 CalculateCenterPositionEachPlane(List<Vector2> mainPlane, float height)
+    {
+
+
+        float xPosition = (mainPlane[0].x + mainPlane[1].x + mainPlane[2].x + mainPlane[3].x) / 4;
+        float zPosition = (mainPlane[0].y + mainPlane[1].y + mainPlane[2].y + mainPlane[3].y) / 4;
+
+        return new Vector3(xPosition, height, zPosition);
+    }
+
+    private List<Vector2> ModifyDataInPoint(List<Vector2> mainPlane)
+    {
+        List<Vector2> newList = new List<Vector2>();
+        foreach (Vector2 point in mainPlane)
+        {
+            float xValue = (float)Math.Round(point.x, 2);
+            float yValue = (float)Math.Round(point.y, 2);
+            newList.Add(new Vector2(xValue, yValue));
+        }
+
+        return newList;
+    }
+
+    private List<Vector2> DeletePointInMainPlane(List<Vector2> listPoint, List<Vector2> mainPlane)
+    {
+        List<Vector2> newList = new List<Vector2>();
+        foreach (Vector2 point in listPoint)
+        {
+            if (CheckPointInsideRectangle(point, mainPlane))
+            {
+            }
+            else
+            {
+                newList.Add(point);
+            }
+        }
+        return newList;
+    }
+
+    private bool CheckPointInsideRectangle(Vector2 point, List<Vector2> mainPlane)
+    {
+        // Kiểm tra xem điểm có nằm trong hình chữ nhật hay không bằng cách so sánh giá trị x và y
+        float minX = Math.Min(Math.Min(mainPlane[0].x, mainPlane[1].x), Math.Min(mainPlane[2].x, mainPlane[3].x));
+        float maxX = Math.Max(Math.Max(mainPlane[0].x, mainPlane[1].x), Math.Max(mainPlane[2].x, mainPlane[3].x));
+        float minY = Math.Min(Math.Min(mainPlane[0].y, mainPlane[1].y), Math.Min(mainPlane[2].y, mainPlane[3].y));
+        float maxY = Math.Max(Math.Max(mainPlane[0].y, mainPlane[1].y), Math.Max(mainPlane[2].y, mainPlane[3].y));
+
+        bool isInsideX = (point.x >= minX && point.x <= maxX);
+        bool isInsideY = (point.y >= minY && point.y <= maxY);
+
+        return isInsideX && isInsideY;
+    }
+
+    private List<Vector2> CleanListTopAndBottomToCreatePlane(List<Vector2> listPoint)
+    {
+        // List này nhận các cặp với nhau
+        List<Vector2> listEven = new List<Vector2>();
+        // List này nhận các phần tử nằm riêng lẻ
+        List<Vector2> listOdd = new List<Vector2>();
+
+
+        List<Vector2> result = new List<Vector2>();
+
+        for (int i = 0; i < listPoint.Count - 1; i++)
+        {
+            if (listPoint[i].y == listPoint[i + 1].y)
+            {
+                listEven.Add(listPoint[i]);
+                listEven.Add(listPoint[i + 1]);
+                i++;
+            }
+            else
+            {
+                listOdd.Add(listPoint[i]);
+            }
+        }
+
+        result.AddRange(listEven);
+        result.AddRange(listOdd);
+
+        result.Sort((p1, p2) =>
+        {
+            int compareY = p1.y.CompareTo(p2.y);
+            if (compareY == 0)
+            {
+                return p1.x.CompareTo(p2.x);
+            }
+            return compareY;
+        });
+
+        return result;
+    }
+
+    private void CreateBottomPlane(float limit, GameObject planeContainer, Vector2 point1, Vector2 point2)
+    {
+        List<Vector2> bottomPlane = new List<Vector2>();
+        Vector2 point4 = new Vector2(point1.x, limit);
+        Vector2 point3 = new Vector2(point2.x, limit);
+
+        bottomPlane.Add(point1);
+        bottomPlane.Add(point2);
+        bottomPlane.Add(point3);
+        bottomPlane.Add(point4);
+
+        float width = CalculateDistance(point1.x, point1.y, point4.x, point4.y);
+        float length = CalculateDistance(point1.x, point1.y, point2.x, point2.y);
+
+        GameObject plane = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        Vector3 centerPosition = CalculateCenterPositionEachPlane(bottomPlane, 90f);
+        plane.transform.localPosition = centerPosition;
+        plane.transform.localScale = new Vector3(length, 5f, width);
+
+
+        // Chuyển cube sang Layer 3D (0 là mặc định)
+        plane.layer = 0;
+
+        Renderer cubeRenderer = plane.GetComponent<Renderer>();
+        cubeRenderer.material.color = UnityColor.gray;
+        plane.transform.parent = planeContainer.transform;
+    }
+
+    private void CreateLeftPlane(float limit, GameObject planeContainer, Vector2 point1, Vector2 point2)
+    {
+        List<Vector2> leftPlane = new List<Vector2>();
+        Vector2 point4 = new Vector2(limit, point1.y);
+        Vector2 point3 = new Vector2(limit, point2.y);
+
+        leftPlane.Add(point1);
+        leftPlane.Add(point2);
+        leftPlane.Add(point3);
+        leftPlane.Add(point4);
+
+        float width = CalculateDistance(point1.x, point1.y, point4.x, point4.y);
+        float length = CalculateDistance(point1.x, point1.y, point2.x, point2.y);
+
+        GameObject plane = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        Vector3 centerPosition = CalculateCenterPositionEachPlane(leftPlane, 90f);
+        plane.transform.localPosition = centerPosition;
+        plane.transform.localScale = new Vector3(width, 5f, length);
+
+
+        // Chuyển cube sang Layer 3D (0 là mặc định)
+        plane.layer = 0;
+
+        Renderer cubeRenderer = plane.GetComponent<Renderer>();
+        cubeRenderer.material.color = UnityColor.gray;
+        plane.transform.parent = planeContainer.transform;
+    }
+
+    private void CreateTopPlane(float limit, GameObject planeContainer, Vector2 point1, Vector2 point2)
+    {
+        List<Vector2> topPlane = new List<Vector2>();
+        Vector2 point4 = new Vector2(point1.x, limit);
+        Vector2 point3 = new Vector2(point2.x, limit);
+
+        topPlane.Add(point1);
+        topPlane.Add(point2);
+        topPlane.Add(point3);
+        topPlane.Add(point4);
+
+        float width = CalculateDistance(point1.x, point1.y, point4.x, point4.y);
+        float length = CalculateDistance(point1.x, point1.y, point2.x, point2.y);
+
+        GameObject plane = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        Vector3 centerPosition = CalculateCenterPositionEachPlane(topPlane, 90f);
+        plane.transform.localPosition = centerPosition;
+        plane.transform.localScale = new Vector3(length, 5f, width);
+
+
+        // Chuyển cube sang Layer 3D (0 là mặc định)
+        plane.layer = 0;
+
+        Renderer cubeRenderer = plane.GetComponent<Renderer>();
+        cubeRenderer.material.color = UnityColor.gray;
+        plane.transform.parent = planeContainer.transform;
     }
 
     #region Function Create Wall
