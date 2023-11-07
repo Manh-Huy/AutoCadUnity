@@ -57,8 +57,8 @@ public class Create3D : MonoBehaviour
     }
     public void ReadJSON()
     {
-        string jsonPath = "Build\\PlaneFloor2.json";
-        //string jsonPath = "house2.json";
+        //string jsonPath = "Build\\PlaneFloor1.json";
+        string jsonPath = "Build\\house2.json";
 
         if (!string.IsNullOrEmpty(jsonPath))
         {
