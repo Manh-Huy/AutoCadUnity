@@ -57,7 +57,7 @@ public class Create3D : MonoBehaviour
     }
     public void ReadJSON()
     {
-        string jsonPath = "Build\\PlaneFloor1.json";
+        string jsonPath = "Build\\PlaneFloor2.json";
         //string jsonPath = "house2.json";
 
         if (!string.IsNullOrEmpty(jsonPath))
@@ -91,13 +91,14 @@ public class Create3D : MonoBehaviour
     public void CreateAllEntities()
     {
         int floorIndex = 0;
-        float groundHeight = 0;
+        float groundHeight = 20f;
+        float planeHeight = 5f;
 
         List<Vector3> coordinatesLastFloorOfWallList = new List<Vector3>();
 
         foreach (UnityFloor floor in _listFloor)
         {
-            GameObject planeContainer = new GameObject("Plane Container");
+            GameObject bottomPlaneContainer = new GameObject("Bottom Plane Container");
             GameObject wallContainer = new GameObject("Wall Container");
             GameObject doorContainer = new GameObject("Door Container");
             GameObject stairContainer = new GameObject("Stair Container");
@@ -148,15 +149,15 @@ public class Create3D : MonoBehaviour
 
                 GameObject plane = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 mainPlane = ModifyDataInPoint(mainPlane);
-                Vector3 centerPosition = CalculateCenterPositionEachPlane(mainPlane, 90f);
+                Vector3 centerPosition = CalculateCenterPositionEachPlane(mainPlane, groundHeight);
                 plane.transform.localPosition = centerPosition;
-                plane.transform.localScale = new Vector3(length, 5f, width);
+                plane.transform.localScale = new Vector3(length, planeHeight, width);
                 // Chuyển cube sang Layer 3D (0 là mặc định)
                 plane.layer = 0;
 
                 Renderer cubeRenderer = plane.GetComponent<Renderer>();
                 cubeRenderer.material.color = UnityColor.gray;
-                plane.transform.parent = planeContainer.transform;
+                plane.transform.parent = bottomPlaneContainer.transform;
 
                 listPoint = DeletePointInMainPlane(listPoint, mainPlane);
 
@@ -183,7 +184,7 @@ public class Create3D : MonoBehaviour
                     {
                         if (pointBottomPlane[i].y == pointBottomPlane[i + 1].y)
                         {
-                            CreateBottomPlane(bottomLimit, planeContainer, pointBottomPlane[i], pointBottomPlane[i + 1]);
+                            CreateBottomPlane(bottomLimit, bottomPlaneContainer, pointBottomPlane[i], pointBottomPlane[i + 1], groundHeight);
                         }
                     }
                 }
@@ -204,7 +205,7 @@ public class Create3D : MonoBehaviour
                 {
                     for (int i = 0; i < pointBottomPlane.Count; i += 2)
                     {
-                        CreateLeftPlane(leftLimit, planeContainer, pointLeftPlane[i], pointLeftPlane[i + 1]);
+                        CreateLeftPlane(leftLimit, bottomPlaneContainer, pointLeftPlane[i], pointLeftPlane[i + 1], groundHeight);
                     }
                 }
                 #endregion
@@ -227,7 +228,7 @@ public class Create3D : MonoBehaviour
                     {
                         if (pointTopPlane[i].y == pointTopPlane[i + 1].y)
                         {
-                            CreateTopPlane(topLimit, planeContainer, pointTopPlane[i], pointTopPlane[i + 1]);
+                            CreateTopPlane(topLimit, bottomPlaneContainer, pointTopPlane[i], pointTopPlane[i + 1], groundHeight);
                         }
                     }
                 }
@@ -244,7 +245,8 @@ public class Create3D : MonoBehaviour
                 //    floorHeight = entityHeight;
                 //}
 
-                floorHeight = 100f; // thay thế các dòng comment trên (set cứng)
+                // floorHeight += planeHeight
+                floorHeight = 100f + planeHeight; // thay thế các dòng comment trên (set cứng)
                 float wallHeight = 100f; // thay thế dòng trên (set cứng)
 
                 if (entity.TypeOfUnityEntity == "Wall" && entity.ObjectType == "LwPolyline")
@@ -283,6 +285,12 @@ public class Create3D : MonoBehaviour
                 }
             }
 
+            // create PlaneTop
+            GameObject topPlaneContainer = Instantiate(bottomPlaneContainer);
+            Vector3 currentPosition = topPlaneContainer.transform.localPosition;
+            topPlaneContainer.transform.localPosition = new(currentPosition.x, floorHeight - planeHeight, currentPosition.z);
+            
+
             // create Stair
             if (verticeStairsList.Count > 0)
             {
@@ -309,23 +317,25 @@ public class Create3D : MonoBehaviour
             floorContainer.transform.position = centerPointEachFloor; //B2
 
             //B3
-            planeContainer.transform.parent = floorContainer.transform;
+            bottomPlaneContainer.transform.parent = floorContainer.transform;
             wallContainer.transform.parent = floorContainer.transform;
             doorContainer.transform.parent = floorContainer.transform;
             stairContainer.transform.parent = floorContainer.transform;
             windowContainer.transform.parent = floorContainer.transform;
             powerContainer.transform.parent = floorContainer.transform;
+            topPlaneContainer.transform.parent = floorContainer.transform;
 
             // Vì roof là object con của tầng cuối cùng nên tạo CreateRoof tại đây
             // create Roof
             if (coordinatesLastFloorOfWallList.Count > 0)
             {
                 Vector3 roofPosition = (Vector3)CalculateDimensionAndCenterPoint(coordinatesLastFloorOfWallList, "centerCoordinates");
+                roofPosition.y -= planeHeight;
                 float roofLength = (float)CalculateDimensionAndCenterPoint(coordinatesLastFloorOfWallList, "length"); // chiều dài của roof
                 float roofWidth = (float)CalculateDimensionAndCenterPoint(coordinatesLastFloorOfWallList, "width"); // chiều rộng của roof
                 // đang set mặc định chiều cao của rooftop =  75% (trung bình cộng chiều cao các tầng ngôi nhà)
                 // vị trí y (chiều cao đặt roof) = groundHeight + floorHeight vì nó nằm trên tầng cuối cùng
-                CreateRoof(floorContainer, roofPosition, roofLength, roofWidth, (groundHeight / _listFloor.Count) * 0.75f, (groundHeight + floorHeight));
+                CreateRoof(floorContainer, roofPosition, roofLength, roofWidth, ((groundHeight + floorHeight) / _listFloor.Count) * 0.75f, (groundHeight + floorHeight)); 
             }
 
             floorContainer.transform.position = _centerPoint; //B4
@@ -340,6 +350,8 @@ public class Create3D : MonoBehaviour
             groundHeight += floorHeight;
         }
     }
+
+    #region Functions Create Plane
 
     private Vector2 FindPointMaxOfPlane(List<Vector2> listPoint)
     {
@@ -570,7 +582,7 @@ public class Create3D : MonoBehaviour
         return result;
     }
 
-    private void CreateBottomPlane(float limit, GameObject planeContainer, Vector2 point1, Vector2 point2)
+    private void CreateBottomPlane(float limit, GameObject bottomPlaneContainer, Vector2 point1, Vector2 point2, float groundHeight)
     {
         List<Vector2> bottomPlane = new List<Vector2>();
         Vector2 point4 = new Vector2(point1.x, limit);
@@ -585,7 +597,7 @@ public class Create3D : MonoBehaviour
         float length = CalculateDistance(point1.x, point1.y, point2.x, point2.y);
 
         GameObject plane = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        Vector3 centerPosition = CalculateCenterPositionEachPlane(bottomPlane, 90f);
+        Vector3 centerPosition = CalculateCenterPositionEachPlane(bottomPlane, groundHeight);
         plane.transform.localPosition = centerPosition;
         plane.transform.localScale = new Vector3(length, 5f, width);
 
@@ -595,10 +607,10 @@ public class Create3D : MonoBehaviour
 
         Renderer cubeRenderer = plane.GetComponent<Renderer>();
         cubeRenderer.material.color = UnityColor.gray;
-        plane.transform.parent = planeContainer.transform;
+        plane.transform.parent = bottomPlaneContainer.transform;
     }
 
-    private void CreateLeftPlane(float limit, GameObject planeContainer, Vector2 point1, Vector2 point2)
+    private void CreateLeftPlane(float limit, GameObject bottomPlaneContainer, Vector2 point1, Vector2 point2, float groundHeight)
     {
         List<Vector2> leftPlane = new List<Vector2>();
         Vector2 point4 = new Vector2(limit, point1.y);
@@ -613,7 +625,7 @@ public class Create3D : MonoBehaviour
         float length = CalculateDistance(point1.x, point1.y, point2.x, point2.y);
 
         GameObject plane = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        Vector3 centerPosition = CalculateCenterPositionEachPlane(leftPlane, 90f);
+        Vector3 centerPosition = CalculateCenterPositionEachPlane(leftPlane, groundHeight);
         plane.transform.localPosition = centerPosition;
         plane.transform.localScale = new Vector3(width, 5f, length);
 
@@ -623,10 +635,10 @@ public class Create3D : MonoBehaviour
 
         Renderer cubeRenderer = plane.GetComponent<Renderer>();
         cubeRenderer.material.color = UnityColor.gray;
-        plane.transform.parent = planeContainer.transform;
+        plane.transform.parent = bottomPlaneContainer.transform;
     }
 
-    private void CreateTopPlane(float limit, GameObject planeContainer, Vector2 point1, Vector2 point2)
+    private void CreateTopPlane(float limit, GameObject bottomPlaneContainer, Vector2 point1, Vector2 point2, float groundHeight)
     {
         List<Vector2> topPlane = new List<Vector2>();
         Vector2 point4 = new Vector2(point1.x, limit);
@@ -641,7 +653,7 @@ public class Create3D : MonoBehaviour
         float length = CalculateDistance(point1.x, point1.y, point2.x, point2.y);
 
         GameObject plane = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        Vector3 centerPosition = CalculateCenterPositionEachPlane(topPlane, 90f);
+        Vector3 centerPosition = CalculateCenterPositionEachPlane(topPlane, groundHeight);
         plane.transform.localPosition = centerPosition;
         plane.transform.localScale = new Vector3(length, 5f, width);
 
@@ -651,8 +663,10 @@ public class Create3D : MonoBehaviour
 
         Renderer cubeRenderer = plane.GetComponent<Renderer>();
         cubeRenderer.material.color = UnityColor.gray;
-        plane.transform.parent = planeContainer.transform;
+        plane.transform.parent = bottomPlaneContainer.transform;
     }
+
+    #endregion
 
     #region Function Create Wall
     private void CreateWall(UnityEntity entity, GameObject wallContainer, float height, float groundHeight)
