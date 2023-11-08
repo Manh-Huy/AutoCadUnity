@@ -87,7 +87,6 @@ public class Create3D : MonoBehaviour
         }
     }
 
-
     public void CreateAllEntities()
     {
         int floorIndex = 0;
@@ -298,6 +297,19 @@ public class Create3D : MonoBehaviour
                 stairLength = (float)CalculateDimensionAndCenterPoint(verticeStairsList, "length");
                 stairWidth = (float)CalculateDimensionAndCenterPoint(verticeStairsList, "width") / 2f;
                 CreateStair(stairPosition, stairLength, stairWidth, stairContainer, floorHeight, groundHeight);
+
+                // Đục lỗ cầu thang (tạo cube cho tầng trên để biết tầng dưới nó có cầu thang)
+                GameObject identifyLocationStair = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                identifyLocationStair.name = "Identify Stair";
+                float scaleYidentifyLocationStair = 2f;
+
+                identifyLocationStair.transform.localScale = new Vector3(stairLength, scaleYidentifyLocationStair, stairWidth);
+                identifyLocationStair.transform.position = new Vector3(stairPosition.x, (groundHeight + floorHeight), stairPosition.z);
+
+                Renderer identifyLocationStairRenderer = identifyLocationStair.GetComponent<Renderer>();
+                identifyLocationStairRenderer.material.color = UnityColor.green;
+
+                identifyLocationStairRenderer.transform.parent = stairContainer.transform;
             }
 
             // Find center point and change position each floor
@@ -971,7 +983,18 @@ public class Create3D : MonoBehaviour
     private void CreateStair(Vector3 position, float stairLength, float stairWidth, GameObject containerStair, float floorHeight, float groundHeight)
     {
         position.y = groundHeight + floorHeight * 0.4375f;
-        Quaternion rotation = Quaternion.Euler(0, 90f, 0f);
+        Quaternion rotation = Quaternion.identity;
+
+        if (stairLength > stairWidth) // cầu thang nằm ngang
+        {
+            rotation = Quaternion.Euler(0, 90f, 0f);
+
+        }
+        else if (stairLength < stairWidth) // cầu thang nằm dọc
+        {
+            rotation = Quaternion.Euler(0, 180f, 0f);
+        }
+        //Quaternion rotation = Quaternion.Euler(0, 90f, 0f);
         GameObject stair = Instantiate(_stairPrefab, position, rotation);
 
         //Vector3 defaultScale = _stairPrefab.transform.localScale;
@@ -1113,7 +1136,7 @@ public class Create3D : MonoBehaviour
         float thicknessOfbottomRoof = 1f;
 
         roof.transform.localRotation = Quaternion.Euler(-90, 0, 0);
-        roof.transform.localScale = new Vector3(roofWidth, roofLength, thicknessOfbottomRoof);
+        roof.transform.localScale = new Vector3(roofLength, roofWidth, thicknessOfbottomRoof);
         roof.transform.position = new Vector3(position.x, (groundHeight + thicknessOfbottomRoof / 2f), position.z);
 
         Renderer cubeRenderer = roof.GetComponent<Renderer>();
@@ -1130,7 +1153,7 @@ public class Create3D : MonoBehaviour
             Quaternion rotation = Quaternion.Euler(-90, 0f, 0f);
             GameObject roofTop = Instantiate(_roofTopPrefab, position, rotation);
 
-            roofTop.transform.localScale = new Vector3(roofWidth * scaleXYRatio, roofLength * scaleXYRatio, roofHeight * scaleZRatio);
+            roofTop.transform.localScale = new Vector3(roofLength * scaleXYRatio, roofWidth * scaleXYRatio, roofHeight * scaleZRatio);
             roofTop.transform.parent = roof.transform;
         }
 
@@ -1254,11 +1277,13 @@ public class Create3D : MonoBehaviour
 
         if (dimension == "length")
         {
-            return projectionSizeX > projectionSizeZ ? projectionSizeX : projectionSizeZ;
+            //return projectionSizeX > projectionSizeZ ? projectionSizeX : projectionSizeZ;
+            return projectionSizeX;
         }
         else if (dimension == "width")
         {
-            return projectionSizeX > projectionSizeZ ? projectionSizeZ : projectionSizeX;
+            //return projectionSizeX > projectionSizeZ ? projectionSizeZ : projectionSizeX;
+            return projectionSizeZ;
         }
         else if (dimension == "centerCoordinates")
         {
