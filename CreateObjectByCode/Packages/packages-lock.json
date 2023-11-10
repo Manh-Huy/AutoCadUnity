@@ -7,6 +7,13 @@
       "dependencies": {},
       "hash": "80f143b9557ee659ed15d9bb941f3600ae2ff9e2"
     },
+    "com.shtif.runtimetransformhandle": {
+      "version": "0.1.4",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "http://package.binaryego.com:4873"
+    },
     "com.unity.collab-proxy": {
       "version": "2.0.1",
       "depth": 0,

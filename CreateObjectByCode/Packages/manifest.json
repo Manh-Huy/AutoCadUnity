@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "com.github-glitchenzo.nugetforunity": "https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity",
+    "com.shtif.runtimetransformhandle": "0.1.4",
     "com.unity.collab-proxy": "2.0.1",
     "com.unity.feature.development": "1.0.1",
     "com.unity.ide.rider": "3.0.18",
@@ -42,5 +43,14 @@
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0"
-  }
+  },
+  "scopedRegistries": [
+    {
+      "name": "Shtif Registry",
+      "url": "http://package.binaryego.com:4873",
+      "scopes": [
+        "com.shtif"
+      ]
+    }
+  ]
 }
