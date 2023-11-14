@@ -49,16 +49,21 @@ public class Create3D : MonoBehaviour
     public Vector3 _centerPoint = new Vector3();
     List<GameObject> _listWall = new List<GameObject>();
 
+    public List<PropertyRow> _propertyRowList = new List<PropertyRow>();
+    public bool _isCreateDone = false;
+
 
     private void Start()
     {
         ReadJSON();
         CreateAllEntities();
+        _isCreateDone = true;
     }
     public void ReadJSON()
     {
         //string jsonPath = "Build\\PlaneFloor1.json";
-        string jsonPath = "Build\\house2.json";
+        //string jsonPath = "Build\\house2.json";
+        string jsonPath = "F:\\Desktop\\house2.json";
 
         if (!string.IsNullOrEmpty(jsonPath))
         {
@@ -356,6 +361,15 @@ public class Create3D : MonoBehaviour
             floorContainer.transform.parent = _houseObject.transform;
             _houseObject.transform.position = _camera.transform.position;
 
+            // Ẩn tầng
+
+            Renderer renderer = floorContainer.AddComponent<MeshRenderer>();
+            PropertyRow propertyRow = floorContainer.AddComponent<PropertyRow>();
+            //PropertyRow propertyRow = new PropertyRow();
+            propertyRow.NameFloor = "Floor " + (floorIndex + 1);
+            propertyRow.Floor = floorContainer;
+            propertyRow.FloorIndex = floorIndex + 1;
+            _propertyRowList.Add(propertyRow);
 
             floorIndex++;
             // cộng với chiều cao tầng này để bắt đầu dựng tầng sau

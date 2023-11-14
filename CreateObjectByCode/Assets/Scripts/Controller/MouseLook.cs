@@ -8,10 +8,13 @@ public class MouseLook : MonoBehaviour
     public Transform _playerBody;
     public float _xRotation = 0f;
 
+    public bool _isMouseLocked;
+
     // Start is called before the first frame update
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
+        _isMouseLocked = true;
     }
 
     // Update is called once per frame
@@ -34,6 +37,20 @@ public class MouseLook : MonoBehaviour
 
         transform.localRotation = Quaternion.Euler(_xRotation, 0f, 0f);
         _playerBody.Rotate(Vector3.up * mouseX);
-  
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (_isMouseLocked == true)
+            {
+                Cursor.lockState = CursorLockMode.None;
+                _isMouseLocked = false;
+            }
+            else
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                _isMouseLocked = true;
+            }
+        }
+
     }
 }
