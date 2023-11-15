@@ -12,15 +12,15 @@ public class PropertyRowUI : MonoBehaviour
     [SerializeField]
     private TMP_Text _buttonHideDisplayFloorText;
 
-    private PropertyRow _propertyRow;
+    private Create3D _create3D;
     private void Start()
     {
         _buttonHideDisplayFloorText.text = "Hide";
 
-        _propertyRow = FindObjectOfType<PropertyRow>();
-        if (_propertyRow == null)
+        _create3D = FindObjectOfType<Create3D>();
+        if (_create3D == null)
         {
-            Debug.Log("PropertyRow is NULL");
+            Debug.Log("Create3D is NULL");
         }
     }
 
@@ -31,6 +31,15 @@ public class PropertyRowUI : MonoBehaviour
 
     public void ClickHideOrDisplay()
     {
+        foreach (PropertyRow floor in _create3D._propertyRowList)
+        {
+            if (_nameFloorText.text == floor.NameFloor)
+            {
+                ToggleStatus(floor.Floor);
+                break;
+            }
+        }
+        
         if (_buttonHideDisplayFloorText.text == "Hide")
         {
             _buttonHideDisplayFloorText.text = "Display";
@@ -39,6 +48,18 @@ public class PropertyRowUI : MonoBehaviour
         {
             _buttonHideDisplayFloorText.text = "Hide";
         }
-        _propertyRow.ToggleStatus();
+    }
+
+    void ToggleStatus(GameObject floor)
+    {
+        Renderer objectRenderer = floor.GetComponent<Renderer>();
+        Renderer[] childRenderers = floor.GetComponentsInChildren<Renderer>();
+
+        objectRenderer.enabled = !objectRenderer.enabled;
+
+        foreach (Renderer childRenderer in childRenderers)
+        {
+            childRenderer.enabled = objectRenderer.enabled;
+        }
     }
 }

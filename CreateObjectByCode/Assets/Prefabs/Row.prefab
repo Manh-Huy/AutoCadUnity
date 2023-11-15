@@ -255,6 +255,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Row
       objectReference: {fileID: 0}
+    - target: {fileID: 4781166955601001422, guid: 51c935f7d3736a9468ca05e6b38e4601, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 9.5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 51c935f7d3736a9468ca05e6b38e4601, type: 3}
 --- !u!1 &1602432577529818634 stripped
@@ -276,6 +280,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _nameFloorText: {fileID: 5801560982391296064}
   _buttonHideDisplayFloorText: {fileID: 3031206065869989413}
+--- !u!114 &5375440572745170635
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1602432577529818634}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: 20
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!114 &5801560982391296064 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7523781573974908290, guid: 51c935f7d3736a9468ca05e6b38e4601, type: 3}

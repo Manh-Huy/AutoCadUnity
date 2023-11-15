@@ -604,7 +604,6 @@ GameObject:
   - component: {fileID: 1915631937}
   - component: {fileID: 1915631936}
   - component: {fileID: 1915631938}
-  - component: {fileID: 1915631939}
   m_Layer: 0
   m_Name: First Person Player
   m_TagString: Untagged
@@ -662,24 +661,6 @@ MonoBehaviour:
   _controller: {fileID: 1915631936}
   _speed: 400
   gravity: -9.81
---- !u!114 &1915631939
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1915631935}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea238300440aff44f8f0314f8560c44e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _selectableTag: Selectable
-  _highlightMat: {fileID: 2100000, guid: dc71e1d833173da479fd42df70c05669, type: 2}
-  _selectedMat: {fileID: 2100000, guid: 1c70e4f770309524c8494f730c58f8ee, type: 2}
-  _controllerCam: {fileID: 0}
-  _hideText: {fileID: 0}
-  _isPressed: 0
 --- !u!1 &2033603326
 GameObject:
   m_ObjectHideFlags: 0
@@ -853,6 +834,7 @@ MonoBehaviour:
   _mouseSentivity: 100
   _playerBody: {fileID: 1915631937}
   _xRotation: 0
+  _isMouseLocked: 0
 --- !u!81 &2039765867
 AudioListener:
   m_ObjectHideFlags: 0

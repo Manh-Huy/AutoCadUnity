@@ -16,9 +16,6 @@ using System.Net;
 using System.Drawing;
 using SystemColor = System.Drawing.Color;
 using UnityColor = UnityEngine.Color;
-using UnityEngine.Experimental.GlobalIllumination;
-using JetBrains.Annotations;
-using System.Reflection;
 
 public class Create3D : MonoBehaviour
 {
@@ -362,13 +359,10 @@ public class Create3D : MonoBehaviour
             _houseObject.transform.position = _camera.transform.position;
 
             // Ẩn tầng
-
             Renderer renderer = floorContainer.AddComponent<MeshRenderer>();
-            PropertyRow propertyRow = floorContainer.AddComponent<PropertyRow>();
-            //PropertyRow propertyRow = new PropertyRow();
+            PropertyRow propertyRow = new PropertyRow();
             propertyRow.NameFloor = "Floor " + (floorIndex + 1);
             propertyRow.Floor = floorContainer;
-            propertyRow.FloorIndex = floorIndex + 1;
             _propertyRowList.Add(propertyRow);
 
             floorIndex++;
