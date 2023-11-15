@@ -159,6 +159,7 @@ public class Create3D : MonoBehaviour
                 Renderer cubeRenderer = plane.GetComponent<Renderer>();
                 cubeRenderer.material.color = UnityColor.gray;
                 plane.transform.parent = bottomPlaneContainer.transform;
+                Renderer rendererbottomPlaneContainer = bottomPlaneContainer.AddComponent<MeshRenderer>();
 
                 listPoint = DeletePointInMainPlane(listPoint, mainPlane);
 
@@ -288,6 +289,7 @@ public class Create3D : MonoBehaviour
 
             // create PlaneTop
             GameObject topPlaneContainer = Instantiate(bottomPlaneContainer);
+            topPlaneContainer.name = "Top Plane Container";
             Vector3 currentPosition = topPlaneContainer.transform.localPosition;
             topPlaneContainer.transform.localPosition = new(currentPosition.x, floorHeight - planeHeight, currentPosition.z);
             
@@ -364,6 +366,24 @@ public class Create3D : MonoBehaviour
             propertyRow.NameFloor = "Floor " + (floorIndex + 1);
             propertyRow.Floor = floorContainer;
             _propertyRowList.Add(propertyRow);
+
+            if (floorIndex == _listFloor.Count - 1)
+            {
+                Transform floorContainerTransform = floorContainer.transform;
+                Transform roofTransform = floorContainerTransform.Find("Roof");
+                if (roofTransform != null)
+                {
+                    GameObject roofObject = roofTransform.gameObject;
+                    PropertyRow propertyRowRoof = new PropertyRow();
+                    propertyRowRoof.NameFloor = "Roof";
+                    propertyRowRoof.Floor = roofObject;
+                    _propertyRowList.Add(propertyRowRoof);
+                }
+                else
+                {
+                    Debug.LogError("Không tìm thấy roof!");
+                }
+            }
 
             floorIndex++;
             // cộng với chiều cao tầng này để bắt đầu dựng tầng sau
