@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 public class PropertyRowUI : MonoBehaviour
 {
+    // floor show, hide
     [SerializeField]
     private TMP_Text _nameFloorText;
 
@@ -21,6 +22,10 @@ public class PropertyRowUI : MonoBehaviour
 
     [SerializeField]
     private Button _hideButton;
+
+    // stair side
+    [SerializeField]
+    private TMP_Text _nameFloorAndStairText;
 
     private Create3D _create3D;
     private void Start()
@@ -37,9 +42,14 @@ public class PropertyRowUI : MonoBehaviour
         }
     }
 
-    public void AssignValues(string nameFloor)
+    public void AssignValuesNameFloor(string nameFloor)
     {
         _nameFloorText.text = nameFloor;
+    }
+
+    public void AssignValuesNameFloorAndStair(string nameFloor)
+    {
+        _nameFloorAndStairText.text = nameFloor;
     }
 
     public void ClickShow()

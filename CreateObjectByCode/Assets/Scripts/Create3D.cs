@@ -103,6 +103,7 @@ public class Create3D : MonoBehaviour
             GameObject wallContainer = new GameObject("Wall Container");
             GameObject doorContainer = new GameObject("Door Container");
             GameObject stairContainer = new GameObject("Stair Container");
+            Renderer rendererStairContainer = stairContainer.AddComponent<MeshRenderer>();
             GameObject windowContainer = new GameObject("Window Container");
             GameObject powerContainer = new GameObject("Power Container");
             float floorHeight = 0;
@@ -1033,6 +1034,7 @@ public class Create3D : MonoBehaviour
         }
         //Quaternion rotation = Quaternion.Euler(0, 90f, 0f);
         GameObject stair = Instantiate(_stairPrefab, position, rotation);
+        stair.name = "Stair";
 
         //Vector3 defaultScale = _stairPrefab.transform.localScale;
         //stair.transform.localScale = defaultScale * floorHeight / defaultScale.y;

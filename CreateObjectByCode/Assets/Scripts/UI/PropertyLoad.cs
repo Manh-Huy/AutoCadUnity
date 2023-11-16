@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,10 +6,16 @@ using UnityEngine;
 public class PropertyLoad : MonoBehaviour
 {
     [SerializeField]
-    private GameObject _rowPrefab;
+    private GameObject _rowShowHidePrefab;
 
     [SerializeField]
-    private GameObject _content;
+    private GameObject _contentShowHide;
+
+    [SerializeField]
+    private GameObject _rowStairSidePrefab;
+
+    [SerializeField]
+    private GameObject _contentStairSide;
 
     private Create3D _create3D;
 
@@ -39,9 +45,43 @@ public class PropertyLoad : MonoBehaviour
     {
         foreach (PropertyRow floor in _create3D._propertyRowList)
         {
-            var row = Instantiate(_rowPrefab, new Vector3(), Quaternion.identity);
-            row.transform.SetParent(_content.transform);
-            row.GetComponent<PropertyRowUI>().AssignValues(floor.NameFloor);
+            // Load hide, show floor
+            var row = Instantiate(_rowShowHidePrefab, new Vector3(), Quaternion.identity);
+            row.transform.SetParent(_contentShowHide.transform);
+            row.GetComponent<PropertyRowUI>().AssignValuesNameFloor(floor.NameFloor);
+
+            // Load side of stair
+            Transform floorTransform = floor.Floor.transform;
+            Transform stairContainerTransform = floorTransform.Find("Stair Container");
+
+            if (stairContainerTransform != null)
+            {
+                GameObject stairContainer = stairContainerTransform.gameObject;
+                if (stairContainer != null)
+                {
+                    if (stairContainer.transform.Find("Stair") != null)
+                    {
+                        int indexStair = 1;
+                        foreach (Transform child in stairContainer.transform)
+                        {
+                            if (child.name == "Stair")
+                            {
+                                GameObject stair = child.gameObject;
+
+                                var rowStair = Instantiate(_rowStairSidePrefab, new Vector3(), Quaternion.identity);
+                                rowStair.transform.SetParent(_contentStairSide.transform);
+                                rowStair.GetComponent<PropertyRowUI>().AssignValuesNameFloorAndStair($"{floor.NameFloor} ({stair.name} {indexStair})");
+
+                            }
+                            indexStair++;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                Debug.Log("???????????????????????");
+            }
         }
     }
 }

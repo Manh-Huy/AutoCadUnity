@@ -142,20 +142,20 @@ PrefabInstance:
       propertyPath: m_Name
       value: Property UI
       objectReference: {fileID: 0}
+    - target: {fileID: 968194918059756431, guid: feaa61d070385c84c9cd8484be8fcecf, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 968194918059756431, guid: feaa61d070385c84c9cd8484be8fcecf, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1197478468638362396, guid: feaa61d070385c84c9cd8484be8fcecf, type: 3}
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7296486161449775427, guid: feaa61d070385c84c9cd8484be8fcecf, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7296486161449775427, guid: feaa61d070385c84c9cd8484be8fcecf, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7296486161449775427, guid: feaa61d070385c84c9cd8484be8fcecf, type: 3}
-      propertyPath: m_SizeDelta.x
+    - target: {fileID: 2001032434261941935, guid: feaa61d070385c84c9cd8484be8fcecf, type: 3}
+      propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8597533748505228310, guid: feaa61d070385c84c9cd8484be8fcecf, type: 3}
@@ -192,7 +192,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8597533748505228310, guid: feaa61d070385c84c9cd8484be8fcecf, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 434.9905
+      value: 431.848
       objectReference: {fileID: 0}
     - target: {fileID: 8597533748505228310, guid: feaa61d070385c84c9cd8484be8fcecf, type: 3}
       propertyPath: m_LocalPosition.x
@@ -460,8 +460,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e45394c2b7f0fe042b5dc7d5f99b6c3c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _rowPrefab: {fileID: 1602432577529818634, guid: eb1f38ead2d2591499c652f0baa9d9ca, type: 3}
-  _content: {fileID: 1884143960}
+  _rowShowHidePrefab: {fileID: 1602432577529818634, guid: eb1f38ead2d2591499c652f0baa9d9ca, type: 3}
+  _contentShowHide: {fileID: 1884143960}
 --- !u!4 &870490280
 Transform:
   m_ObjectHideFlags: 0
