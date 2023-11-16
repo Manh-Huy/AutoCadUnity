@@ -60,7 +60,7 @@ public class Create3D : MonoBehaviour
     {
         //string jsonPath = "Build\\PlaneFloor1.json";
         //string jsonPath = "Build\\house2.json";
-        string jsonPath = "F:\\Desktop\\house2.json";
+        string jsonPath = "F:\\Desktop\\exportWall-Line.json";
 
         if (!string.IsNullOrEmpty(jsonPath))
         {
@@ -122,9 +122,7 @@ public class Create3D : MonoBehaviour
 
                 foreach (UnityEntity entity in floor.ListEntities)
                 {
-
-
-                    if (entity.TypeOfUnityEntity == "Wall" && entity.ObjectType == "LwPolyline")
+                    if (entity.TypeOfUnityEntity == "Wall" && (entity.ObjectType == "LwPolyline" || entity.ObjectType == "Line"))
                     {
                         foreach (string coordinate in entity.Coordinates)
                         {
@@ -251,7 +249,7 @@ public class Create3D : MonoBehaviour
                 floorHeight = 100f + planeHeight; // thay thế các dòng comment trên (set cứng)
                 float wallHeight = 100f; // thay thế dòng trên (set cứng)
 
-                if (entity.TypeOfUnityEntity == "Wall" && entity.ObjectType == "LwPolyline")
+                if (entity.TypeOfUnityEntity == "Wall" && (entity.ObjectType == "LwPolyline" || entity.ObjectType == "Line"))
                 {
                     //float wallHeight = entityHeight;
 
@@ -724,8 +722,15 @@ public class Create3D : MonoBehaviour
 
             if (i == (verticesList.Count - 1))
             {
-                startPoint = verticesList[i];
-                endPoint = verticesList[0];
+                if (verticesList.Count > 2)
+                {
+                    startPoint = verticesList[i];
+                    endPoint = verticesList[0];
+                }
+                else
+                {
+                    break;
+                }
             }
             else
             {
