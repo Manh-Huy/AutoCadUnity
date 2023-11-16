@@ -60,7 +60,7 @@ public class Create3D : MonoBehaviour
     {
         //string jsonPath = "Build\\PlaneFloor1.json";
         //string jsonPath = "Build\\house2.json";
-        string jsonPath = "F:\\Desktop\\exportWall-Line.json";
+        string jsonPath = "F:\\Desktop\\house2.json";
 
         if (!string.IsNullOrEmpty(jsonPath))
         {
@@ -349,7 +349,7 @@ public class Create3D : MonoBehaviour
                 float roofWidth = (float)CalculateDimensionAndCenterPoint(coordinatesLastFloorOfWallList, "width"); // chiều rộng của roof
                 // đang set mặc định chiều cao của rooftop =  75% (trung bình cộng chiều cao các tầng ngôi nhà)
                 // vị trí y (chiều cao đặt roof) = groundHeight + floorHeight vì nó nằm trên tầng cuối cùng
-                CreateRoof(floorContainer, roofPosition, roofLength, roofWidth, ((groundHeight + floorHeight) / _listFloor.Count) * 0.75f, (groundHeight + floorHeight)); 
+                CreateRoof(floorContainer, roofPosition, roofLength, roofWidth, ((groundHeight + floorHeight) / _listFloor.Count) * 0.75f, (groundHeight + floorHeight));
             }
 
             floorContainer.transform.position = _centerPoint; //B4
@@ -372,6 +372,10 @@ public class Create3D : MonoBehaviour
                 if (roofTransform != null)
                 {
                     GameObject roofObject = roofTransform.gameObject;
+
+                    // Đặt đối tượng Roof ra cùng cấp với floorContainer
+                    roofObject.transform.parent = _houseObject.transform;
+
                     PropertyRow propertyRowRoof = new PropertyRow();
                     propertyRowRoof.NameFloor = "Roof";
                     propertyRowRoof.Floor = roofObject;
