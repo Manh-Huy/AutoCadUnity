@@ -363,6 +363,7 @@ public class Create3D : MonoBehaviour
             Renderer renderer = floorContainer.AddComponent<MeshRenderer>();
             PropertyRow propertyRow = new PropertyRow();
             propertyRow.NameFloor = "Floor " + (floorIndex + 1);
+            propertyRow.IndexFloor = (floorIndex + 1);
             propertyRow.Floor = floorContainer;
             _propertyRowList.Add(propertyRow);
 
@@ -379,6 +380,7 @@ public class Create3D : MonoBehaviour
 
                     PropertyRow propertyRowRoof = new PropertyRow();
                     propertyRowRoof.NameFloor = "Roof";
+                    propertyRowRoof.IndexFloor = (floorIndex + 1);
                     propertyRowRoof.Floor = roofObject;
                     _propertyRowList.Add(propertyRowRoof);
                 }

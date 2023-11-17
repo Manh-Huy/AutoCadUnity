@@ -19,6 +19,8 @@ public class PropertyLoad : MonoBehaviour
 
     private Create3D _create3D;
 
+    public Dictionary<string, GameObject> _stairDictionary = new Dictionary<string, GameObject>();
+
 
     // Start is called before the first frame update
     void Start()
@@ -67,20 +69,17 @@ public class PropertyLoad : MonoBehaviour
                             if (child.name == "Stair")
                             {
                                 GameObject stair = child.gameObject;
+                                string stairName = $"{stair.name} {indexStair} (F{floor.IndexFloor})";
+                                _stairDictionary.Add(stairName, stair);
 
                                 var rowStair = Instantiate(_rowStairSidePrefab, new Vector3(), Quaternion.identity);
                                 rowStair.transform.SetParent(_contentStairSide.transform);
-                                rowStair.GetComponent<PropertyRowUI>().AssignValuesNameFloorAndStair($"{floor.NameFloor} ({stair.name} {indexStair})");
-
+                                rowStair.GetComponent<PropertyRowUI>().AssignValuesNameFloorAndStair(stairName);
                             }
                             indexStair++;
                         }
                     }
                 }
-            }
-            else
-            {
-                Debug.Log("???????????????????????");
             }
         }
     }

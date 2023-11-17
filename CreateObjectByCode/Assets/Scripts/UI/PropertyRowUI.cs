@@ -27,7 +27,20 @@ public class PropertyRowUI : MonoBehaviour
     [SerializeField]
     private TMP_Text _nameFloorAndStairText;
 
+    [SerializeField]
+    private TMP_Text _buttonLeftSideStairText;
+
+    [SerializeField]
+    private TMP_Text _buttonRightSideStairText;
+
+    [SerializeField]
+    private Button _leftSideStairButton;
+
+    [SerializeField]
+    private Button _rightSideStairButton;
+
     private Create3D _create3D;
+    private PropertyLoad _propertyLoad;
     private void Start()
     {
         _buttonShowFloorText.text = "Show";
@@ -35,10 +48,19 @@ public class PropertyRowUI : MonoBehaviour
         _showButton.interactable = false;
         _hideButton.interactable = true;
 
+        _buttonLeftSideStairText.text = "Left/Front";
+        _buttonRightSideStairText.text = "Right/Back";
+
         _create3D = FindObjectOfType<Create3D>();
         if (_create3D == null)
         {
             Debug.Log("Create3D is NULL");
+        }
+
+        _propertyLoad = FindObjectOfType<PropertyLoad>();
+        if (_propertyLoad == null)
+        {
+            Debug.Log("PropertyLoad is NULL");
         }
     }
 
@@ -116,6 +138,15 @@ public class PropertyRowUI : MonoBehaviour
         }
         _showButton.interactable = true;
         _hideButton.interactable = false;
+    }
+
+    public void ClickLeft()
+    {
+        string targetStairName = _nameFloorAndStairText.text;
+        if (_propertyLoad._stairDictionary.ContainsKey(targetStairName))
+        {
+            GameObject targetStair = _propertyLoad._stairDictionary[targetStairName];
+        }
     }
 
     void ShowObject(GameObject obj)

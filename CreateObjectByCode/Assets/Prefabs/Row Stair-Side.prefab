@@ -303,6 +303,10 @@ MonoBehaviour:
   _showButton: {fileID: 5964367863208719276}
   _hideButton: {fileID: 263692080780751899}
   _nameFloorAndStairText: {fileID: 5801560982391296064}
+  _buttonLeftSideStairText: {fileID: 3031206065869989413}
+  _buttonRightSideStairText: {fileID: 8898096567793885586}
+  _leftSideStairButton: {fileID: 5964367863208719276}
+  _rightSideStairButton: {fileID: 263692080780751899}
 --- !u!114 &5375440572745170635
 MonoBehaviour:
   m_ObjectHideFlags: 0
