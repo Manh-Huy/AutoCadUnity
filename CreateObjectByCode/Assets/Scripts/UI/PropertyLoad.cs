@@ -17,9 +17,9 @@ public class PropertyLoad : MonoBehaviour
     [SerializeField]
     private GameObject _contentStairSide;
 
-    private Create3D _create3D;
-
     public Dictionary<string, GameObject> _stairDictionary = new Dictionary<string, GameObject>();
+
+    private Create3D _create3D;
 
 
     // Start is called before the first frame update
@@ -50,7 +50,7 @@ public class PropertyLoad : MonoBehaviour
             // Load hide, show floor
             var row = Instantiate(_rowShowHidePrefab, new Vector3(), Quaternion.identity);
             row.transform.SetParent(_contentShowHide.transform);
-            row.GetComponent<PropertyRowUI>().AssignValuesNameFloor(floor.NameFloor);
+            row.GetComponent<ShowHideFloorRow>().AssignValuesNameFloor(floor.NameFloor);
 
             // Load side of stair
             Transform floorTransform = floor.Floor.transform;
@@ -74,7 +74,7 @@ public class PropertyLoad : MonoBehaviour
 
                                 var rowStair = Instantiate(_rowStairSidePrefab, new Vector3(), Quaternion.identity);
                                 rowStair.transform.SetParent(_contentStairSide.transform);
-                                rowStair.GetComponent<PropertyRowUI>().AssignValuesNameFloorAndStair(stairName);
+                                rowStair.GetComponent<StairSideRow>().AssignValuesNameFloorAndStair(stairName);
                             }
                             indexStair++;
                         }

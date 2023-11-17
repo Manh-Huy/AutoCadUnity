@@ -126,7 +126,7 @@ PrefabInstance:
     - target: {fileID: 5838669046367561204, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: -6113616117312653797}
+      objectReference: {fileID: 5239935347791427244}
     - target: {fileID: 5838669046367561204, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
@@ -137,7 +137,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5838669046367561204, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: PropertyRowUI, Assembly-CSharp
+      value: ShowHideFloorRow, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 5838669046367561204, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -285,7 +285,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 3374995417429828552, guid: 51c935f7d3736a9468ca05e6b38e4601, type: 3}
   m_PrefabInstance: {fileID: 4101265796441066946}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &-6113616117312653797
+--- !u!114 &5239935347791427244
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -294,7 +294,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1602432577529818634}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b4a15505cfe8371498b3270a1368a9db, type: 3}
+  m_Script: {fileID: 11500000, guid: 3b6ee7ce14f7b2f4b80789f024f8ca55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _nameFloorText: {fileID: 5801560982391296064}
@@ -302,7 +302,6 @@ MonoBehaviour:
   _buttonHideFloorText: {fileID: 8898096567793885586}
   _showButton: {fileID: 5964367863208719276}
   _hideButton: {fileID: 263692080780751899}
-  _nameFloorAndStairText: {fileID: 5801560982391296064}
 --- !u!114 &5375440572745170635
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -461,7 +460,7 @@ PrefabInstance:
     - target: {fileID: 5838669046367561204, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: -6113616117312653797}
+      objectReference: {fileID: 5239935347791427244}
     - target: {fileID: 5838669046367561204, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
@@ -472,7 +471,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5838669046367561204, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: PropertyRowUI, Assembly-CSharp
+      value: ShowHideFloorRow, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 5838669046367561204, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName

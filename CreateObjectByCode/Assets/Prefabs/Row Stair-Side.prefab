@@ -9,7 +9,9 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3013945762946068605, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_text
-      value: Left
+      value: 'Left/
+
+        Front'
       objectReference: {fileID: 0}
     - target: {fileID: 3013945762946068605, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_fontSize
@@ -61,11 +63,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5199209526416587212, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 60.5897
+      value: 65.9118
       objectReference: {fileID: 0}
     - target: {fileID: 5199209526416587212, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 38.4436
+      value: 49.4688
       objectReference: {fileID: 0}
     - target: {fileID: 5199209526416587212, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_LocalPosition.x
@@ -97,11 +99,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5199209526416587212, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 19.8
+      value: 22.461
       objectReference: {fileID: 0}
     - target: {fileID: 5199209526416587212, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.9
+      value: 1.8
       objectReference: {fileID: 0}
     - target: {fileID: 5199209526416587212, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -126,18 +128,18 @@ PrefabInstance:
     - target: {fileID: 5838669046367561204, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: -6113616117312653797}
+      objectReference: {fileID: 35583994641928274}
     - target: {fileID: 5838669046367561204, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5838669046367561204, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: ClickShow
+      value: ClickLeftOrFront
       objectReference: {fileID: 0}
     - target: {fileID: 5838669046367561204, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: PropertyRowUI, Assembly-CSharp
+      value: StairSideRow, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 5838669046367561204, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -145,7 +147,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6360943742375871878, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_Name
-      value: Button Left Side
+      value: Button Left/Front Side
       objectReference: {fileID: 0}
     - target: {fileID: 8042115709764851488, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -285,7 +287,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 3374995417429828552, guid: 51c935f7d3736a9468ca05e6b38e4601, type: 3}
   m_PrefabInstance: {fileID: 4101265796441066946}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &-6113616117312653797
+--- !u!114 &35583994641928274
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -294,19 +296,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1602432577529818634}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b4a15505cfe8371498b3270a1368a9db, type: 3}
+  m_Script: {fileID: 11500000, guid: 78bb0faa21c2a074bb5e1d17e825dae7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _nameFloorText: {fileID: 5801560982391296064}
-  _buttonShowFloorText: {fileID: 3031206065869989413}
-  _buttonHideFloorText: {fileID: 8898096567793885586}
-  _showButton: {fileID: 5964367863208719276}
-  _hideButton: {fileID: 263692080780751899}
   _nameFloorAndStairText: {fileID: 5801560982391296064}
-  _buttonLeftSideStairText: {fileID: 3031206065869989413}
-  _buttonRightSideStairText: {fileID: 8898096567793885586}
-  _leftSideStairButton: {fileID: 5964367863208719276}
-  _rightSideStairButton: {fileID: 263692080780751899}
+  _buttonLeftFrontSideStairText: {fileID: 3031206065869989413}
+  _buttonRightBackSideStairText: {fileID: 8898096567793885586}
+  _leftFrontSideStairButton: {fileID: 5964367863208719276}
+  _rightBackSideStairButton: {fileID: 263692080780751899}
 --- !u!114 &5375440572745170635
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -323,7 +320,7 @@ MonoBehaviour:
   m_MinWidth: -1
   m_MinHeight: -1
   m_PreferredWidth: -1
-  m_PreferredHeight: 20
+  m_PreferredHeight: 25
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
@@ -352,11 +349,13 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3013945762946068605, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_text
-      value: Right
+      value: 'Right/
+
+        Back'
       objectReference: {fileID: 0}
     - target: {fileID: 3013945762946068605, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_fontSize
-      value: 14
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 3013945762946068605, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_margin.x
@@ -368,7 +367,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3013945762946068605, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_fontSizeBase
-      value: 14
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 5199209526416587212, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_Pivot.x
@@ -400,11 +399,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5199209526416587212, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 55.4381
+      value: 60.3077
       objectReference: {fileID: 0}
     - target: {fileID: 5199209526416587212, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 38.4436
+      value: 49.4688
       objectReference: {fileID: 0}
     - target: {fileID: 5199209526416587212, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_LocalPosition.x
@@ -436,11 +435,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5199209526416587212, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 86.82269
+      value: 94.30246
       objectReference: {fileID: 0}
     - target: {fileID: 5199209526416587212, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.9
+      value: 1.8000073
       objectReference: {fileID: 0}
     - target: {fileID: 5199209526416587212, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -465,18 +464,18 @@ PrefabInstance:
     - target: {fileID: 5838669046367561204, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: -6113616117312653797}
+      objectReference: {fileID: 35583994641928274}
     - target: {fileID: 5838669046367561204, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5838669046367561204, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: ClickHide
+      value: ClickRightOrBack
       objectReference: {fileID: 0}
     - target: {fileID: 5838669046367561204, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: PropertyRowUI, Assembly-CSharp
+      value: StairSideRow, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 5838669046367561204, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -484,7 +483,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6360943742375871878, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_Name
-      value: Button Right Side
+      value: Button Right/Back Side
       objectReference: {fileID: 0}
     - target: {fileID: 8042115709764851488, guid: 6d345666d66488f4a91eeba6eab054de, type: 3}
       propertyPath: m_SizeDelta.x
