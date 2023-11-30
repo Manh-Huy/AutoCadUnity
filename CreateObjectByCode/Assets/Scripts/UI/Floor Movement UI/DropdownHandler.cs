@@ -1,13 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class DropdownHandler : MonoBehaviour
 {
     public Text text;
     [SerializeField]
-    private float _speed = 4.5f;
+    private float _speed = 30f;
     [SerializeField]
     private Button _leftButton;
     [SerializeField]
@@ -19,11 +21,13 @@ public class DropdownHandler : MonoBehaviour
 
     private Create3D _create3D;
 
-    private bool _isLoad = false;
-
-    private List<PropertyRow> _propertyRows;
-
     string _nameFloorIndex;
+
+    private bool _isMovingLeft = false;
+    private bool _isMovingRight = false;
+
+    private bool _isMovingForward = false;
+    private bool _isMovingBackward = false;
 
     void Start()
     {
@@ -33,7 +37,59 @@ public class DropdownHandler : MonoBehaviour
             Debug.Log("The Create3D is NULL");
         }
 
-        
+        // Add EventTriggers directly to the buttons
+        AddEventTrigger(_leftButton, () => _isMovingLeft = true, () => _isMovingLeft = false);
+        AddEventTrigger(_rightButton, () => _isMovingRight = true, () => _isMovingRight = false);
+        AddEventTrigger(_frontButton, () => _isMovingForward = true, () => _isMovingForward = false);
+        AddEventTrigger(_backButton, () => _isMovingBackward = true, () => _isMovingBackward = false);
+    }
+
+    void Update()
+    {
+        GameObject floor;
+        if (_isMovingLeft || Input.GetKey(KeyCode.Alpha4) || Input.GetKey(KeyCode.Keypad4))
+        {
+            floor = TakeFloorFromNameFloor(_nameFloorIndex);
+            // Di chuyển sang trái
+            floor.transform.Translate(Vector3.left * _speed * Time.deltaTime);
+        }
+
+        if (_isMovingRight || Input.GetKey(KeyCode.Alpha6) || Input.GetKey(KeyCode.Keypad6))
+        {
+            floor = TakeFloorFromNameFloor(_nameFloorIndex);
+            // Di chuyển sang phải
+            floor.transform.Translate(Vector3.right * _speed * Time.deltaTime);
+        }
+
+        if (_isMovingForward || Input.GetKey(KeyCode.Alpha8) || Input.GetKey(KeyCode.Keypad8))
+        {
+            floor = TakeFloorFromNameFloor(_nameFloorIndex);
+            // Di chuyển về phía trước
+            floor.transform.Translate(Vector3.forward * _speed * Time.deltaTime);
+        }
+
+        if (_isMovingBackward || Input.GetKey(KeyCode.Alpha5) || Input.GetKey(KeyCode.Keypad5))
+        {
+            floor = TakeFloorFromNameFloor(_nameFloorIndex);
+            // Di chuyển về phía sau
+            floor.transform.Translate(Vector3.back * _speed * Time.deltaTime);
+        }
+    }
+    void AddEventTrigger(Button button, UnityEngine.Events.UnityAction downAction, UnityEngine.Events.UnityAction upAction)
+    {
+        EventTrigger eventTrigger = button.gameObject.GetComponent<EventTrigger>();
+        if (eventTrigger == null)
+        {
+            eventTrigger = button.gameObject.AddComponent<EventTrigger>();
+        }
+
+        EventTrigger.Entry entryDown = new EventTrigger.Entry { eventID = EventTriggerType.PointerDown };
+        entryDown.callback.AddListener((eventData) => downAction.Invoke());
+        eventTrigger.triggers.Add(entryDown);
+
+        EventTrigger.Entry entryUp = new EventTrigger.Entry { eventID = EventTriggerType.PointerUp };
+        entryUp.callback.AddListener((eventData) => upAction.Invoke());
+        eventTrigger.triggers.Add(entryUp);
     }
 
     public void AssignValuesNameFloor(List<string> nameFloorList)
@@ -47,7 +103,6 @@ public class DropdownHandler : MonoBehaviour
         }
         DropdownItemSelected(dropdown);
         dropdown.onValueChanged.AddListener(delegate { DropdownItemSelected(dropdown); });
-        _isLoad = true;
     }
 
     void DropdownItemSelected(Dropdown dropdown)
@@ -56,103 +111,19 @@ public class DropdownHandler : MonoBehaviour
 
         _nameFloorIndex = dropdown.options[index].text;
         text.text = _nameFloorIndex;
+    }
 
-        if (_isLoad == true)
+    GameObject TakeFloorFromNameFloor(string nameFloor)
+    {
+        GameObject floorObject = new GameObject();
+        foreach (PropertyRow floor in _create3D._propertyRowList)
         {
-            foreach (PropertyRow floor in _create3D._propertyRowList)
+            if (floor.NameFloor == nameFloor)
             {
-                if (floor.NameFloor == _nameFloorIndex)
-                {
-                    Debug.Log(floor.NameFloor);
-                    GameObject floorObject = floor.Floor;
-
-                    if (Input.GetKeyDown(KeyCode.Alpha4))
-                    {
-                        Debug.Log("Floor ii move left");
-                        MoveLeft(floorObject);
-                    }
-
-                    if (Input.GetKeyDown(KeyCode.Alpha6))
-                    {
-                        MoveRight(floorObject);
-                    }
-
-                    if (Input.GetKeyDown(KeyCode.Alpha8))
-                    {
-                        MoveFront(floorObject);
-                    }
-
-                    if (Input.GetKeyDown(KeyCode.Alpha5))
-                    {
-                        MoveBack(floorObject);
-                    }
-
-                    // Gán sự kiện click cho các nút
-                    _leftButton.onClick.AddListener(() => MoveLeft(floorObject));
-                    _rightButton.onClick.AddListener(() => MoveRight(floorObject));
-                    _frontButton.onClick.AddListener(() => MoveFront(floorObject));
-                    _backButton.onClick.AddListener(() => MoveBack(floorObject));
-                }
+                floorObject = floor.Floor;
+                break;
             }
         }
-    }
-
-    void MoveLeft(GameObject objectToMove)
-    {
-        objectToMove.transform.Translate(Vector3.left * _speed * Time.deltaTime);
-    }
-    void MoveRight(GameObject objectToMove)
-    {
-        objectToMove.transform.Translate(Vector3.right * _speed * Time.deltaTime);
-    }
-    void MoveFront(GameObject objectToMove)
-    {
-        objectToMove.transform.Translate(Vector3.forward * _speed * Time.deltaTime);
-    }
-    void MoveBack(GameObject objectToMove)
-    {
-        objectToMove.transform.Translate(Vector3.back * _speed * Time.deltaTime);
-    }
-
-    private void Update()
-    {
-        if (_isLoad == true)
-        {
-            foreach (PropertyRow floor in _create3D._propertyRowList)
-            {
-                if (floor.NameFloor == _nameFloorIndex)
-                {
-                    Debug.Log(floor.NameFloor);
-                    GameObject floorObject = floor.Floor;
-
-                    if (Input.GetKeyDown(KeyCode.Keypad4))
-                    {
-                        Debug.Log("Floor ii move left");
-                        MoveLeft(floorObject);
-                    }
-
-                    if (Input.GetKeyDown(KeyCode.Keypad6))
-                    {
-                        MoveRight(floorObject);
-                    }
-
-                    if (Input.GetKeyDown(KeyCode.Keypad8))
-                    {
-                        MoveFront(floorObject);
-                    }
-
-                    if (Input.GetKeyDown(KeyCode.Keypad5))
-                    {
-                        MoveBack(floorObject);
-                    }
-
-                    // Gán sự kiện click cho các nút
-                    _leftButton.onClick.AddListener(() => MoveLeft(floorObject));
-                    _rightButton.onClick.AddListener(() => MoveRight(floorObject));
-                    _frontButton.onClick.AddListener(() => MoveFront(floorObject));
-                    _backButton.onClick.AddListener(() => MoveBack(floorObject));
-                }
-            }
-        }
+        return floorObject;
     }
 }
