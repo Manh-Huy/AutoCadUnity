@@ -9,8 +9,6 @@ public class DropdownHandler : MonoBehaviour
 {
     public Text text;
     [SerializeField]
-    private float _speed = 30f;
-    [SerializeField]
     private Button _leftButton;
     [SerializeField]
     private Button _rightButton;
@@ -20,8 +18,9 @@ public class DropdownHandler : MonoBehaviour
     private Button _backButton;
 
     private Create3D _create3D;
+    private SliderHandler _sliderHandler;
 
-    string _nameFloorIndex;
+    public string _nameFloorIndex;
 
     private bool _isMovingLeft = false;
     private bool _isMovingRight = false;
@@ -32,9 +31,16 @@ public class DropdownHandler : MonoBehaviour
     void Start()
     {
         _create3D = FindObjectOfType<Create3D>();
+        _sliderHandler = FindObjectOfType<SliderHandler>();
+
         if (_create3D == null)
         {
             Debug.Log("The Create3D is NULL");
+        }
+
+        if (_sliderHandler == null)
+        {
+            Debug.Log("The SliderHandler is NULL");
         }
 
         // Add EventTriggers directly to the buttons
@@ -46,6 +52,7 @@ public class DropdownHandler : MonoBehaviour
 
     void Update()
     {
+        float _speed = _sliderHandler.MovementSpeed();
         GameObject floor;
         if (_isMovingLeft || Input.GetKey(KeyCode.Alpha4) || Input.GetKey(KeyCode.Keypad4))
         {
@@ -65,14 +72,32 @@ public class DropdownHandler : MonoBehaviour
         {
             floor = TakeFloorFromNameFloor(_nameFloorIndex);
             // Di chuyển về phía trước
-            floor.transform.Translate(Vector3.forward * _speed * Time.deltaTime);
+            // nếu là roof vì trục y là z và z là y nên lên trước là Vector3.down
+            if (_nameFloorIndex == "Roof")
+            {
+                floor.transform.Translate(Vector3.down * _speed * Time.deltaTime);
+
+            }
+            else
+            {
+                floor.transform.Translate(Vector3.forward * _speed * Time.deltaTime);
+            }
         }
 
         if (_isMovingBackward || Input.GetKey(KeyCode.Alpha5) || Input.GetKey(KeyCode.Keypad5))
         {
             floor = TakeFloorFromNameFloor(_nameFloorIndex);
             // Di chuyển về phía sau
-            floor.transform.Translate(Vector3.back * _speed * Time.deltaTime);
+            // nếu là roof vì trục y là z và z là y nên lên trước là Vector3.down
+            if (_nameFloorIndex == "Roof")
+            {
+                floor.transform.Translate(Vector3.up * _speed * Time.deltaTime);
+
+            }
+            else
+            {
+                floor.transform.Translate(Vector3.back * _speed * Time.deltaTime);
+            }
         }
     }
     void AddEventTrigger(Button button, UnityEngine.Events.UnityAction downAction, UnityEngine.Events.UnityAction upAction)
@@ -115,15 +140,13 @@ public class DropdownHandler : MonoBehaviour
 
     GameObject TakeFloorFromNameFloor(string nameFloor)
     {
-        GameObject floorObject = new GameObject();
         foreach (PropertyRow floor in _create3D._propertyRowList)
         {
             if (floor.NameFloor == nameFloor)
             {
-                floorObject = floor.Floor;
-                break;
+                return floor.Floor;
             }
         }
-        return floorObject;
+        return null;
     }
 }
