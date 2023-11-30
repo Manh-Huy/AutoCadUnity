@@ -15,16 +15,16 @@ public class StairSideRow : MonoBehaviour
     [SerializeField]
     private Button _rightBackSideStairButton;
 
-    private PropertyLoad _propertyLoad;
+    private LoadUI _propertyLoad;
     private void Start()
     {
         _leftFrontSideStairButton.interactable = false;
         _rightBackSideStairButton.interactable = true;
 
-        _propertyLoad = FindObjectOfType<PropertyLoad>();
+        _propertyLoad = FindObjectOfType<LoadUI>();
         if (_propertyLoad == null)
         {
-            Debug.Log("PropertyLoad is NULL");
+            Debug.Log("LoadUI is NULL");
         }
     }
 

@@ -1,9 +1,8 @@
-﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PropertyLoad : MonoBehaviour
+public class LoadUI : MonoBehaviour
 {
     [SerializeField]
     private GameObject _rowShowHidePrefab;
@@ -17,10 +16,15 @@ public class PropertyLoad : MonoBehaviour
     [SerializeField]
     private GameObject _contentStairSide;
 
+    [SerializeField]
+    private GameObject _dropdownPrefab;
+
+    [SerializeField]
+    private GameObject _positionDropdown;
+
     public Dictionary<string, GameObject> _stairDictionary = new Dictionary<string, GameObject>();
 
     private Create3D _create3D;
-
 
     // Start is called before the first frame update
     void Start()
@@ -45,6 +49,7 @@ public class PropertyLoad : MonoBehaviour
 
     void LoadProperty()
     {
+        List<string> nameFloorList = new List<string>();
         foreach (PropertyRow floor in _create3D._propertyRowList)
         {
             // Load hide, show floor
@@ -81,6 +86,10 @@ public class PropertyLoad : MonoBehaviour
                     }
                 }
             }
+            nameFloorList.Add(floor.NameFloor);
         }
+        var dropdown = Instantiate(_dropdownPrefab, _positionDropdown.transform.position, Quaternion.identity);
+        dropdown.transform.SetParent(_positionDropdown.transform);
+        dropdown.GetComponent<DropdownHandler>().AssignValuesNameFloor(nameFloorList);
     }
 }
