@@ -42,12 +42,12 @@ public class LoadUI : MonoBehaviour
     {
         if (_create3D._isCreateDone == true)
         {
-            LoadProperty();
+            LoadUi();
             _create3D._isCreateDone = false;
         }
     }
 
-    void LoadProperty()
+    void LoadUi()
     {
         List<string> nameFloorList = new List<string>();
         foreach (PropertyRow floor in _create3D._propertyRowList)
