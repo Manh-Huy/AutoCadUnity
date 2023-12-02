@@ -46,7 +46,7 @@ public class Create3D : MonoBehaviour
     public Vector3 _centerPoint = new Vector3();
     List<GameObject> _listWall = new List<GameObject>();
 
-    public List<PropertyRow> _propertyRowList = new List<PropertyRow>();
+    public Dictionary<int, GameObject> _floorDictionary = new Dictionary<int, GameObject>();
     public bool _isCreateDone = false;
 
 
@@ -361,11 +361,7 @@ public class Create3D : MonoBehaviour
 
             // Ẩn tầng
             Renderer renderer = floorContainer.AddComponent<MeshRenderer>();
-            PropertyRow propertyRow = new PropertyRow();
-            propertyRow.NameFloor = "Floor " + (floorIndex + 1);
-            propertyRow.IndexFloor = (floorIndex + 1);
-            propertyRow.Floor = floorContainer;
-            _propertyRowList.Add(propertyRow);
+            _floorDictionary.Add((floorIndex + 1), floorContainer);
 
             if (floorIndex == _listFloor.Count - 1)
             {
@@ -378,11 +374,7 @@ public class Create3D : MonoBehaviour
                     // Đặt đối tượng Roof ra cùng cấp với floorContainer
                     roofObject.transform.parent = _houseObject.transform;
 
-                    PropertyRow propertyRowRoof = new PropertyRow();
-                    propertyRowRoof.NameFloor = "Roof";
-                    propertyRowRoof.IndexFloor = (floorIndex + 1);
-                    propertyRowRoof.Floor = roofObject;
-                    _propertyRowList.Add(propertyRowRoof);
+                    _floorDictionary.Add(floorIndex + 2, roofObject); // số tầng của roof sẽ là tầng trên cùng
                 }
                 else
                 {

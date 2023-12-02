@@ -270,7 +270,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 289451490, guid: feaa61d070385c84c9cd8484be8fcecf, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: feaa61d070385c84c9cd8484be8fcecf, type: 3}
 --- !u!224 &130567460 stripped
 RectTransform:
@@ -2241,7 +2242,6 @@ MonoBehaviour:
   _powerPrefab: {fileID: 8498418051937864479, guid: 142b298b7edf8cb46bf794849a7d2224, type: 3}
   _roofTopPrefab: {fileID: 6196633440644838523, guid: 3ca29eda7a9a996409b6911b65463acd, type: 3}
   _centerPoint: {x: 0, y: 0, z: 0}
-  _propertyRowList: []
   _isCreateDone: 0
 --- !u!114 &2033603328
 MonoBehaviour:

@@ -76,7 +76,6 @@ public class DropdownHandler : MonoBehaviour
             if (_nameFloorIndex == "Roof")
             {
                 floor.transform.Translate(Vector3.down * _speed * Time.deltaTime);
-
             }
             else
             {
@@ -92,7 +91,6 @@ public class DropdownHandler : MonoBehaviour
             if (_nameFloorIndex == "Roof")
             {
                 floor.transform.Translate(Vector3.up * _speed * Time.deltaTime);
-
             }
             else
             {
@@ -138,13 +136,19 @@ public class DropdownHandler : MonoBehaviour
         text.text = _nameFloorIndex;
     }
 
-    GameObject TakeFloorFromNameFloor(string nameFloor)
+    GameObject TakeFloorFromNameFloor(string nameFloorIndex)
     {
-        foreach (PropertyRow floor in _create3D._propertyRowList)
+        int elementCount = _create3D._floorDictionary.Count;
+        foreach (var floor in _create3D._floorDictionary)
         {
-            if (floor.NameFloor == nameFloor)
+            string nameFloor = $"Floor {floor.Key}";
+            if (floor.Key == elementCount)
             {
-                return floor.Floor;
+                nameFloor = "Roof";
+            }
+            if (nameFloor == nameFloorIndex)
+            {
+                return floor.Value;
             }
         }
         return null;

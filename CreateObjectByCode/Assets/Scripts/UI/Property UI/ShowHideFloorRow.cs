@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -35,19 +36,34 @@ public class ShowHideFloorRow : MonoBehaviour
 
     public void ClickShow()
     {
-        for (int i = 0; i < _create3D._propertyRowList.Count; i++)
+        int elementCount = _create3D._floorDictionary.Count;
+        var orderedDictionary = _create3D._floorDictionary.OrderBy(pair => pair.Key).ToDictionary(pair => pair.Key, pair => pair.Value);
+        for (int i = 0; i < orderedDictionary.Count; i++)
         {
-            PropertyRow floor = _create3D._propertyRowList[i];
-
-            if (_nameFloorText.text == floor.NameFloor)
+            int floorIndex = orderedDictionary.Keys.ElementAt(i);
+            string nameFloor = $"Floor {floorIndex}";
+            if (floorIndex == elementCount)
             {
-                ShowObject(floor.Floor);
+                nameFloor = "Roof";
+            }
+            GameObject floor = orderedDictionary[floorIndex];
+
+            if (_nameFloorText.text == nameFloor)
+            {
+                ShowObject(floor);
 
                 // ẩn / hiện sàn tầng trước đó (ví dụ ẩn/hiện tầng 2 thì ẩn/hiện luôn sàn (top) tầng 1)
-                if (i > 0)
+                if (floorIndex > 1)
                 {
-                    PropertyRow previousFloor = _create3D._propertyRowList[i - 1];
-                    Transform floorTransform = previousFloor.Floor.transform;
+                    int previousFloorIndex = orderedDictionary.Keys.ElementAt(i - 1);
+                    string previousNameFloor = $"Floor {previousFloorIndex}";
+                    //if (previousFloorIndex == elementCount)
+                    //{
+                    //    previousNameFloor = "Roof";
+                    //}
+                    GameObject previousFloor = orderedDictionary[previousFloorIndex];
+
+                    Transform floorTransform = previousFloor.transform;
                     Transform bottomPlaneTransform = floorTransform.Find("Top Plane Container");
                     if (bottomPlaneTransform != null)
                     {
@@ -68,19 +84,36 @@ public class ShowHideFloorRow : MonoBehaviour
 
     public void ClickHide()
     {
-        for (int i = 0; i < _create3D._propertyRowList.Count; i++)
-        {
-            PropertyRow floor = _create3D._propertyRowList[i];
+        int elementCount = _create3D._floorDictionary.Count;
+        var orderedDictionary = _create3D._floorDictionary.OrderBy(pair => pair.Key).ToDictionary(pair => pair.Key, pair => pair.Value);
 
-            if (_nameFloorText.text == floor.NameFloor)
+        for (int i = 0; i < orderedDictionary.Count; i++)
+        {
+            int floorIndex = orderedDictionary.Keys.ElementAt(i);
+            string nameFloor = $"Floor {floorIndex}";
+
+            if (floorIndex == elementCount)
             {
-                HideObject(floor.Floor);
+                nameFloor = "Roof";
+            }
+            GameObject floor = orderedDictionary[floorIndex];
+
+            if (_nameFloorText.text == nameFloor)
+            {
+                HideObject(floor);
 
                 // ẩn / hiện sàn tầng trước đó (ví dụ ẩn/hiện tầng 2 thì ẩn/hiện luôn sàn (top) tầng 1)
-                if (i > 0)
+                if (floorIndex > 1)
                 {
-                    PropertyRow previousFloor = _create3D._propertyRowList[i - 1];
-                    Transform floorTransform = previousFloor.Floor.transform;
+                    int previousFloorIndex = orderedDictionary.Keys.ElementAt(i - 1);
+                    //string previousNameFloor = $"Floor {previousFloorIndex}";
+                    //if (previousFloorIndex == elementCount)
+                    //{
+                    //    previousNameFloor = "Roof";
+                    //}
+                    GameObject previousFloor = orderedDictionary[previousFloorIndex];
+
+                    Transform floorTransform = previousFloor.transform;
                     Transform bottomPlaneTransform = floorTransform.Find("Top Plane Container");
                     if (bottomPlaneTransform != null)
                     {
