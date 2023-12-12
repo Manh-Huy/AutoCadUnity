@@ -20,15 +20,33 @@ public class MouseLook : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            ToggleMouseLock();
+        }
 
-        // Translation
-        /*        float horizontalInput = Input.GetAxis("Horizontal");
-                float verticalInput = Input.GetAxis("Vertical");
+        if (_isMouseLocked)
+        {
+            HandleMouseInput();
+        }
+    }
 
-                Vector3 translation = new Vector3(horizontalInput, 0, verticalInput) * _moveSpeed * Time.deltaTime;
-                transform.Translate(translation);*/
+    void ToggleMouseLock()
+    {
+        if (_isMouseLocked)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            _isMouseLocked = false;
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            _isMouseLocked = true;
+        }
+    }
 
-        // Mouse Rotation
+    void HandleMouseInput()
+    {
         float mouseX = Input.GetAxis("Mouse X") * _mouseSentivity * Time.deltaTime;
         float mouseY = Input.GetAxis("Mouse Y") * _mouseSentivity * Time.deltaTime;
 
@@ -37,20 +55,6 @@ public class MouseLook : MonoBehaviour
 
         transform.localRotation = Quaternion.Euler(_xRotation, 0f, 0f);
         _playerBody.Rotate(Vector3.up * mouseX);
-
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            if (_isMouseLocked == true)
-            {
-                Cursor.lockState = CursorLockMode.None;
-                _isMouseLocked = false;
-            }
-            else
-            {
-                Cursor.lockState = CursorLockMode.Locked;
-                _isMouseLocked = true;
-            }
-        }
-
     }
 }
+

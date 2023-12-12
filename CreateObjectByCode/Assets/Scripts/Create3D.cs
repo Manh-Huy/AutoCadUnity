@@ -43,7 +43,7 @@ public class Create3D : MonoBehaviour
 
     private List<UnityFloor> _listFloor = new List<UnityFloor>();
     List<Vector3> __listAllVerticesOfWall = new List<Vector3>();
-    public Vector3 _centerPoint = new Vector3();
+    //public Vector3 _centerPoint = new Vector3(0, 0, 0);
     List<GameObject> _listWall = new List<GameObject>();
 
     public Dictionary<int, GameObject> _floorDictionary = new Dictionary<int, GameObject>();
@@ -318,10 +318,10 @@ public class Create3D : MonoBehaviour
             // Find center point and change position each floor
             Vector3 centerPointEachFloor = (Vector3)CalculateDimensionAndCenterPoint(coordinatesWallEachFloorList, "centerCoordinates");
 
-            if (floorIndex == 0) // tầng 1
-            {
-                _centerPoint = centerPointEachFloor;
-            }
+            //if (floorIndex == 0) // tầng 1
+            //{
+            //    _centerPoint = centerPointEachFloor;
+            //}
             /*
              * B1: tạo object cha (floorContainer)
              * B2: di chuyển nó đến vị trí trọng tâm của tầng đó
@@ -353,11 +353,11 @@ public class Create3D : MonoBehaviour
                 CreateRoof(floorContainer, roofPosition, roofLength, roofWidth, ((groundHeight + floorHeight) / _listFloor.Count) * 0.75f, (groundHeight + floorHeight));
             }
 
-            floorContainer.transform.position = _centerPoint; //B4
+            floorContainer.transform.position = new Vector3(0, 0, 0); //B4
 
             // đưa floorContainer vào object cha (House) và đưa nó vào vị trí trong camera cho dễ nhìn
             floorContainer.transform.parent = _houseObject.transform;
-            _houseObject.transform.position = _camera.transform.position;
+            //_houseObject.transform.position = _camera.transform.position;
 
             // Ẩn tầng
             Renderer renderer = floorContainer.AddComponent<MeshRenderer>();
